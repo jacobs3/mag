@@ -1,0 +1,6 @@
+#include "SiteController.hpp"
+
+Site::Site()
+{
+    
+}

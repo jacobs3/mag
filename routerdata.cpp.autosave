@@ -1,0 +1,8 @@
+#include "RouterData.hpp"
+
+
+RouterData::RouterData()
+    :id(0)
+{
+    
+}
