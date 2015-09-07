@@ -25,7 +25,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 #include "Editor.hpp"
 #include "PortView.hpp"
-#include "Connection.hpp"
+#include "ConnectionView.hpp"
 #include "Router.hpp"
 
 #include <QGraphicsScene>
@@ -37,7 +37,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 Editor::Editor(MainWindow *mainWindow, QMainWindow *parent)
    : QMainWindow(parent), view(mainWindow)
 {
-    std::cout<<"aaa"<<std::endl;
     this->setContextMenuPolicy(Qt::CustomContextMenu);
     conn = 0;
 
@@ -79,6 +78,7 @@ void Editor::handleRouterMenu(QGraphicsSceneMouseEvent *me)
 item->getId();
    if(calledItem == action1)
    {
+       view->showRouterMenu(item->getId());
        cout1();
    }
    else if(calledItem == action2)
@@ -87,6 +87,8 @@ item->getId();
    }
    else if(calledItem == action3)
    {
+       std::cout<<"delete";
+       site.deleteRouter(item->getId());
        delete item;
    }
    else if(calledItem == action4)
@@ -113,6 +115,7 @@ void Editor::handleLinkMenu(QGraphicsSceneMouseEvent *me)
     if(calledItem == action1)
     {
        // item->onDelete();
+         site.deleteConnection(item->getId());
          delete item;
     }
     else if(calledItem == action2)
@@ -141,7 +144,8 @@ bool Editor::eventFilter(QObject *o, QEvent *e)
 			QGraphicsItem *item = itemAt(me->scenePos());
             if (item && item->type() == PortView::Type)
 			{
-                conn = new ConnectionView(0);
+                ;
+                conn = new ConnectionView(site.initializeConnection());
                 scene->addItem(conn);
                 conn->setPort1((PortView*) item);
 				conn->setPos1(item->scenePos());
@@ -239,11 +243,12 @@ std::cout<<"gy "<<g.y()<<std::endl;*/
                 PortView *port1 = conn->port1();
                 PortView *port2 = (PortView*) item;
 
-				if (port1->block() != port2->block() && port1->isOutput() != port2->isOutput() && !port1->isConnected(port2))
+                if (port1->block() != port2->block() && port1->getIsInput() != port2->getIsInput() && !port1->isConnected(port2))
 				{
 					conn->setPos2(port2->scenePos());
 					conn->setPort2(port2);
 					conn->updatePath();
+                    site.addConnection(conn->getId(), port1->getId(),port2->getId());
 					conn = 0;
 					return true;
 				}
@@ -259,13 +264,7 @@ std::cout<<"gy "<<g.y()<<std::endl;*/
 	return QObject::eventFilter(o, e);
 }
 
-void Editor::addRouter()
-{
-    //fixme routerId
-    RouterId id= site.addRouter();
-    view->addRouter(id);
 
-}
 
 void Editor::saveFile()
 {
@@ -349,8 +348,48 @@ void Editor::contextMenuRequested(const QPoint &pos)
    contextMenu.exec(mapToGlobal(pos));
 }*/
 
+void Editor::addRouter()
+{
+    RouterId id= site.addRouter();
+    PortId inputPortId = site.addPort(id, "in", true);
+    PortId outputPortId = site.addPort(id, "out", false);
+    site.getRouter(id)->addInputPort(inputPortId, site.getPort(inputPortId));
+    site.getRouter(id)->addOutputPort(outputPortId, site.getPort(outputPortId));
+    view->addRouter(id);
+    view->addPort(id, inputPortId, "in", true);
+    view->addPort(id, outputPortId, "out", false);
+}
+
 void Editor::deleteItem(QWidget *item)
 {
 
     delete item;
+}
+
+Site& Editor::getSite()
+{
+    return site;
+}
+
+
+void Editor::setRouterName(RouterId id, std::string name)
+{
+    site.getRouter(id)->setName(name);
+}
+
+void Editor::setPortName(PortId id, std::string name)
+{
+    site.getPort(id)->setName(name);
+}
+
+void Editor::removePort(RouterId routerId, PortId portId)
+{
+    site.deletePort(routerId, portId);
+    view->deletePort(portId);
+}
+
+void Editor::addPort(RouterId routerId, std::string name, bool isInput)
+{
+    PortId portId = site.addPort(routerId, name, isInput);
+    view->addPort(routerId, portId, name, isInput);
 }

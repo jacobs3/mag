@@ -26,6 +26,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 
 #include <QGraphicsPathItem>
+#include "Typedefs.hpp"
 
 
 class PortView;
@@ -35,7 +36,7 @@ class ConnectionView : public QGraphicsPathItem
 public:
 	enum { Type = QGraphicsItem::UserType + 2 };
 
-    ConnectionView(QGraphicsItem *parent = 0);
+    ConnectionView(ConnectionId id, QGraphicsItem *parent = 0);
     ~ConnectionView();
 
 	void setPos1(const QPointF &p);
@@ -51,10 +52,12 @@ public:
     void load(QDataStream&, const QMap<quint64, PortView*> &portMap);
 
 	int type() const { return Type; }
+    ConnectionId getId();
 
 private:
 	QPointF pos1;
 	QPointF pos2;
     PortView *m_port1;
     PortView *m_port2;
+    ConnectionId id;
 };

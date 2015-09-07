@@ -33,7 +33,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 int main(int argc, char *argv[])
 {
-       std::cout<<"abc";
     QApplication a(argc, argv);
 
     MainWindow w;

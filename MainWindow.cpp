@@ -46,7 +46,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
 
-    QDockWidget *dock = new QDockWidget(tr("View"), this);
+    dock = new QDockWidget(tr("View"), this);
     dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     view = new QGraphicsView(dock);
     view->setScene(scene);
@@ -94,7 +94,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
 
-    RouterView *b = new RouterView(0);
+  /*  RouterView *b = new RouterView(0);
     scene->addItem(b);
     b->addPort("R1", 0, PortView::NamePort);
   //  b->addPort("test", 0, QNEPort::TypePort);
@@ -161,7 +161,8 @@ MainWindow::MainWindow(QWidget *parent) :
    // b = b->clone();
    // b->addPort("R3", 0, QNEPort::NamePort);
   //  b->
-   // b->setPos(150, 150);
+   // b->setPos(150, 150);*/
+    resize(QDesktopWidget().availableGeometry(this).size() * 0.7);
 }
 
 MainWindow::~MainWindow()
@@ -176,12 +177,27 @@ void MainWindow::addRouter(RouterId id)
     RouterView *v = new RouterView(id);
 
     scene->addItem(v);
-	for (int i = 0; i < 4 + rand() % 3; i++)
+    /*for (int i = 0; i < 4 + rand() % 3; i++)
 	{
         v->addPort("RX", rand() % 2, 0, 0);
         v->setPos(view->sceneRect().center().toPoint());
-	}
+    }*/
     routers[id]=v;
+}
+
+void MainWindow::addPort(RouterId routerId, PortId portId, std::string name, bool isInput)
+{
+    PortView* port = routers[routerId]->addPort(QString::fromUtf8(name.c_str()), isInput);
+    port->setId(portId);
+    routers[routerId]->setPos(view->sceneRect().center().toPoint());
+    ports[portId] = port;
+    scene->addItem(port);
+}
+
+void MainWindow::deletePort(PortId portId)
+{
+    delete ports[portId];
+
 }
 /*void MainWindow::showContextMenu(const QPoint& pos) // this is a slot
 {
@@ -213,4 +229,40 @@ void MainWindow::showContextMenu(const QPoint &pos)
    contextMenu.addAction(&action1);
 
    contextMenu.exec(mapToGlobal(pos));
+}
+
+void MainWindow::showRouterMenu(RouterId id)
+{
+    RouterManagementDialog *window = new RouterManagementDialog(nodesEditor->getSite().getRouter(id),nodesEditor, this);
+    window->show();
+
+   /* std::shared_ptr<Router> r= ;
+    std::cout<<"1";
+    QWidget *wdg = new QWidget;
+   // QHBoxLayout* layout = new QHBoxLayout;
+    QMainWindow *routerMenuWindow = new QMainWindow;
+    QHBoxLayout *layout = new QHBoxLayout( wdg );
+     std::cout<<"2";
+    QLabel * routerNameLabel = new QLabel(tr("router name"));
+   QLineEdit *lineEdit = new QLineEdit (tr(r->getName().c_str(), wdg ));
+   QPushButton *nameSubmitButton = new QPushButton(tr("Set name"),wdg);
+   layout->addWidget(routerNameLabel);
+   layout->addWidget(lineEdit);
+   layout->addWidget(nameSubmitButton);
+
+    routerMenuWindow->setCentralWidget(wdg);
+        routerMenuWindow->show();
+   // wdg->ad
+   // dock->setWidget(abc) ;
+    //layout->addWidget(wdg);
+   // wdg->show();
+  //  wdg->ad
+   // this->
+    QLineEdit *routerNameField = new QLineEdit("My first Text Edit box!");
+    QComboBox *comboBox = new QComboBox;
+        comboBox->addItem(tr("item 1"));
+        comboBox->addItem(tr("item 2"));
+        comboBox->addItem(tr("item 3"));*/
+
+
 }

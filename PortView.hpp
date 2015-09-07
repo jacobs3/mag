@@ -26,6 +26,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 #pragma once
 
 #include <QGraphicsPathItem>
+#include "Typedefs.hpp"
 
 class RouterView;
 class ConnectionView;
@@ -36,14 +37,14 @@ public:
 	enum { Type = QGraphicsItem::UserType + 1 };
 	enum { NamePort = 1, TypePort = 2 };
 
-    PortView(QGraphicsItem *parent = 0);
+    PortView(PortId id, QGraphicsItem *parent = 0);
     ~PortView();
 
     void setNEBlock(RouterView*);
 	void setName(const QString &n);
-	void setIsOutput(bool o);
+    void setIsInput(bool isIn);
 	int radius();
-	bool isOutput();
+    bool getIsInput();
     QVector<ConnectionView*>& connections();
 	void setPortFlags(int);
 
@@ -51,6 +52,7 @@ public:
 	int portFlags() const { return m_portFlags; }
 
 	int type() const { return Type; }
+    PortId getId();
 
     RouterView* block() const;
 
@@ -58,6 +60,7 @@ public:
 	void setPtr(quint64);
 
     bool isConnected(PortView*);
+    void setId(PortId);
 
 protected:
 	QVariant itemChange(GraphicsItemChange change, const QVariant &value);
@@ -65,12 +68,13 @@ protected:
 private:
     RouterView *m_block;
 	QString name;
-	bool isOutput_;
+    bool isInput;
 	QGraphicsTextItem *label;
 	int radius_;
 	int margin;
     QVector<ConnectionView*> m_connections;
 	int m_portFlags;
 	quint64 m_ptr;
+    PortId id;
 };
 

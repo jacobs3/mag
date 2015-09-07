@@ -30,8 +30,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 #include <QPen>
 #include <QGraphicsScene>
 
-ConnectionView::ConnectionView(QGraphicsItem *parent) : QGraphicsPathItem(parent)
+ConnectionView::ConnectionView(ConnectionId connId, QGraphicsItem *parent) : QGraphicsPathItem(parent)
 {
+    id = connId;
 	setPen(QPen(Qt::black, 2));
 	setBrush(Qt::NoBrush);
 	setZValue(-1);
@@ -123,4 +124,9 @@ void ConnectionView::load(QDataStream &ds, const QMap<quint64, PortView*> &portM
 	setPort2(portMap[ptr2]);
 	updatePosFromPorts();
 	updatePath();
+}
+
+ConnectionId ConnectionView::getId()
+{
+    return id;
 }

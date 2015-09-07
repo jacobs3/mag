@@ -1,10 +1,21 @@
 
+
+
 #pragma once
+
+#include <string>
+#include "Typedefs.hpp"
 
 class Port
 {
 public:
-    const QString& getPortName() const { return name; }
+    Port(PortId, std::string, bool);
+    std::string getName();
+    void setName(std::string );
+    PortId getId();
+    bool getIsInput();
 private:
-    QString name;
+    PortId id;
+    std::string name;
+    bool isInput;
 };

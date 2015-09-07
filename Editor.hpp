@@ -55,6 +55,11 @@ public:
 
     void handleRouterMenu(QGraphicsSceneMouseEvent *me);
     void handleLinkMenu(QGraphicsSceneMouseEvent *me);
+    Site& getSite();
+    void setRouterName(RouterId id, std::string name);
+    void setPortName(PortId id, std::string name);
+    void removePort(RouterId routerId, PortId portId);
+    void addPort(RouterId routerId, std::string name, bool isInput);
 public slots:
     void saveFile();
     void loadFile();

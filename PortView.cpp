@@ -31,8 +31,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 #include <QPen>
 
 
-PortView::PortView(QGraphicsItem *parent):
-    QGraphicsPathItem(parent)
+PortView::PortView(PortId portId, QGraphicsItem *parent):
+    id(portId), QGraphicsPathItem(parent)
 {
 	label = new QGraphicsTextItem(this);
 
@@ -68,14 +68,14 @@ void PortView::setName(const QString &n)
 	label->setPlainText(n);
 }
 
-void PortView::setIsOutput(bool o)
+void PortView::setIsInput(bool isIn)
 {
-	isOutput_ = o;
+    isInput = isIn;
 
 	QFontMetrics fm(scene()->font());
 	QRect r = fm.boundingRect(name);
 
-	if (isOutput_)
+    if (isIn)
 		label->setPos(-radius_ - margin - label->boundingRect().width(), -label->boundingRect().height()/2);
 	else
 		label->setPos(radius_ + margin, -label->boundingRect().height()/2);
@@ -86,9 +86,9 @@ int PortView::radius()
 	return radius_;
 }
 
-bool PortView::isOutput()
+bool PortView::getIsInput()
 {
-	return isOutput_;
+    return isInput;
 }
 
 QVector<ConnectionView*>& PortView::connections()
@@ -150,4 +150,14 @@ QVariant PortView::itemChange(GraphicsItemChange change, const QVariant &value)
 		}
 	}
 	return value;
+}
+
+PortId PortView::getId()
+{
+    return id;
+}
+
+void PortView::setId(PortId portId)
+{
+    id = portId;
 }

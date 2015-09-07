@@ -21,7 +21,9 @@ SOURCES +=\
     Router.cpp \
     ConnectionView.cpp \
     PortView.cpp \
-    Port.cpp
+    Port.cpp \
+    Connection.cpp \
+    RouterManagementDialog.cpp
 
 
 HEADERS  += \
@@ -36,7 +38,8 @@ HEADERS  += \
     ConnectionView.hpp \
     Connection.hpp \
     PortView.hpp \
-    Port.hpp
+    Port.hpp \
+    RouterManagementDialog.hpp
 
 DISTFILES +=
 

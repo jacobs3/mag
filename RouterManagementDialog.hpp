@@ -30,38 +30,43 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 #include <QMainWindow>
 #include <QtWidgets>
-#include <list>
 #include "Typedefs.hpp"
-#include "RouterManagementDialog.hpp"
-
+#include "Router.hpp"
+#include <list>
+#include <memory>
+class Editor;
 
 class Editor;
 
-class MainWindow : public QMainWindow
+class RouterManagementDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
-    void showRouterMenu(RouterId id);
-    void addRouter(RouterId id);
-    void addPort(RouterId routerId, PortId portId, std::string name, bool isInput);
-    void deletePort(PortId portId);
-    ~MainWindow();
+    explicit RouterManagementDialog(std::shared_ptr<Router>, Editor*, QWidget*);
+    ~RouterManagementDialog(){}
 
 private slots:
-
-
-    void showContextMenu(const QPoint& pos);
+    void setRouterName();
+    void setPortName();
+    void removePort();
+    void addPort();
 
 private:
-
+    void repopulatePortNamesList();
+    void fillPortsComboBox(QComboBox *combo);
+    QLineEdit *routerNameField;
+    QLineEdit *portNameField;
+    QLineEdit *addPortNameField;
+    QCheckBox *isInputCheckBox;
+    QVBoxLayout *mainLayout;
     Editor *nodesEditor;
-    QMenu *fileMenu;
+    QComboBox *renamePortsComboBox;
+    QComboBox *removePortsComboBox;
     QGraphicsView *view;
     QGraphicsScene *scene;
-    std::map<RouterId, RouterView*> routers;
-    std::map<PortId, PortView*> ports;
-    QDockWidget *dock;
+    std::shared_ptr<Router> router;
+    RouterId id;
+    std::map<PortId, std::shared_ptr<Port> > ports;
 
 };

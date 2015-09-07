@@ -50,10 +50,10 @@ RouterView::RouterView(RouterId routerId, QGraphicsItem *parent) : QGraphicsPath
          m_pmnu->addAction("&Red");
          m_pmnu->addAction("&Green");
          m_pmnu->addAction("&Blue");
-         connect(m_pmnu,
-                 SIGNAL(triggered(QAction*)),
-                 SLOT(testSlot(QAction*))
-                );
+        // connect(m_pmnu,
+            //     SIGNAL(triggered(QAction*)),
+           //      SLOT(testSlot(QAction*))
+             //   );
 }
 void RouterView::onDelete()
 {
@@ -65,11 +65,11 @@ int RouterView::getId()
     return id;
 }
 
-PortView* RouterView::addPort(const QString &name, bool isOutput, int flags, int ptr)
+PortView* RouterView::addPort(const QString &name, bool isInput, int flags, int ptr)
 {
-    PortView *port = new PortView(this);
+    PortView *port = new PortView(0, this);
 	port->setName(name);
-	port->setIsOutput(isOutput);
+    port->setIsInput(isInput);
 	port->setNEBlock(this);
 	port->setPortFlags(flags);
 	port->setPtr(ptr);
@@ -92,7 +92,7 @@ PortView* RouterView::addPort(const QString &name, bool isOutput, int flags, int
 			continue;
 
         PortView *port = (PortView*) port_;
-		if (port->isOutput())
+        if (!port->getIsInput())
 			port->setPos(width/2 + port->radius(), y);
 		else
 			port->setPos(-width/2 - port->radius(), y);
@@ -104,12 +104,12 @@ PortView* RouterView::addPort(const QString &name, bool isOutput, int flags, int
 
 void RouterView::addInputPort(const QString &name)
 {
-	addPort(name, false);
+    addPort(name, true);
 }
 
 void RouterView::addOutputPort(const QString &name)
 {
-	addPort(name, true);
+    addPort(name, false);
 }
 
 void RouterView::addInputPorts(const QStringList &names)
@@ -148,7 +148,7 @@ void RouterView::save(QDataStream &ds)
         PortView *port = (PortView*) port_;
 		ds << (quint64) port;
 		ds << port->portName();
-		ds << port->isOutput();
+        ds << port->getIsInput();
 		ds << port->portFlags();
 	}
 }
@@ -203,7 +203,7 @@ RouterView* RouterView::clone()
         if (port_->type() == PortView::Type)
 		{
             PortView *port = (PortView*) port_;
-			b->addPort(port->portName(), port->isOutput(), port->portFlags(), port->ptr());
+            b->addPort(port->portName(), port->getIsInput(), port->portFlags(), port->ptr());
 		}
 	}
 
@@ -228,10 +228,11 @@ QVariant RouterView::itemChange(GraphicsItemChange change, const QVariant &value
 
 	return value;
 }
-
+/*
 void RouterView::testSlot(QAction* pAction)
  {
     // QString strColor = pAction->text().remove("&");
      std::cout<<"test";
    //  setHtml(QString("<BODY BGCOLOR=%1></BODY>").arg(strColor));
  }
+*/
