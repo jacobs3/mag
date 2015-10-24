@@ -124,12 +124,10 @@ void Editor::handleLinkMenu(QGraphicsSceneMouseEvent *me)
 bool Editor::eventFilter(QObject *o, QEvent *e)
 {
 	QGraphicsSceneMouseEvent *me = (QGraphicsSceneMouseEvent*) e;
-//std::cout<<"eventFilter";
 	switch ((int) e->type())
 	{
 	case QEvent::GraphicsSceneMousePress:
 	{
-std::cout<<"press";
 		switch ((int) me->button())
 		{
 		case Qt::LeftButton:
@@ -225,10 +223,8 @@ std::cout<<"gy "<<g.y()<<std::endl;*/
 	}
 	case QEvent::GraphicsSceneMouseMove:
 	{
-        std::cout<<"move1";
         if (conn)
 		{
-            std::cout<<"move2";
             conn->setPos2(me->scenePos());
             conn->updatePath();
 			return true;
@@ -374,8 +370,10 @@ std::string Editor::displayNextMplsPacket()
 {
     try
     {
-        lastMplsPackets.push(site->calculateNextHop(nextHopPort));
+        lastMplsPackets.push(site->calculateNextHop(labelStack, nextHopPort));
         nextHopPort = std::get<2>(lastMplsPackets.top());
+        labelStack = std::get<0>(lastMplsPackets.top());
+        std::cout<<"next Hop "<<nextHopPort<<std::endl;
         view->showMplsPacket(std::get<1>(lastMplsPackets.top()), std::get<2>(lastMplsPackets.top()),
                              std::get<0>(lastMplsPackets.top()));
     }
@@ -394,6 +392,8 @@ std::string Editor::displayNextMplsPacket(RouterId id, FEC fec)
         lastMplsPackets.push(site->calculateNextHop(id, fec));
         std::cout<<"displayNextMplsPacket 2"<<std::endl;
         nextHopPort = std::get<2>(lastMplsPackets.top());
+        labelStack = std::get<0>(lastMplsPackets.top());
+        std::cout<<"next Hop "<<nextHopPort<<std::endl;
         view->showMplsPacket(std::get<1>(lastMplsPackets.top()), std::get<2>(lastMplsPackets.top()),
                              std::get<0>(lastMplsPackets.top()));
         std::cout<<"displayNextMplsPacket 3"<<std::endl;
@@ -407,15 +407,22 @@ std::string Editor::displayNextMplsPacket(RouterId id, FEC fec)
 
 std::string Editor::displayPrevMplsPacket()
 {
+    std::cout<<"prev 1 "<<lastMplsPackets.size()<<std::endl;
+    auto tmp = lastMplsPackets.top();
+    lastMplsPackets.pop();
     if(lastMplsPackets.size() > 0 )
     {
+        std::cout<<"prev 2"<<std::endl;
         view->showMplsPacket(std::get<1>(lastMplsPackets.top()), std::get<2>(lastMplsPackets.top()),
                              std::get<0>(lastMplsPackets.top()));
-        lastMplsPackets.pop();
+
+        labelStack = std::get<0>(lastMplsPackets.top());
         nextHopPort = std::get<2>(lastMplsPackets.top());
+        std::cout<<"next Hop "<<nextHopPort<<std::endl;
     }
     else
     {
+        lastMplsPackets.push(tmp);
         return "No previous packets to display";
     }
     return "";

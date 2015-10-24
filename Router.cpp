@@ -178,11 +178,11 @@ std::string Router::addIlmEntry(IlmEntry entry)
         ilmTable->push_back(entry);
         std::sort(ilmTable->begin(),ilmTable->end(),[](IlmEntry a, IlmEntry b)
         {
-          if(a.inLabel<b.inLabel)
+          if(a.inLabels<b.inLabels)
           {
               return true;
           }
-          else if(a.inLabel>b.inLabel)
+          else if(a.inLabels>b.inLabels)
           {
               return false;
           }

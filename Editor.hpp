@@ -86,6 +86,7 @@ private:
     ConnectionView *conn;
     std::stack<std::tuple<std::vector<Label>, PortId, PortId> > lastMplsPackets;
     PortId nextHopPort;
+    std::vector<Label> labelStack;
 
 private slots:
 void deleteItem(QWidget *item);

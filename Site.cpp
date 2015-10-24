@@ -90,22 +90,17 @@ bool Site::setRouterName(RouterId id, std::string name)
     return true;
 }
 
-std::tuple<std::vector<Label>, PortId, PortId> Site::calculateNextHop(PortId entryPort)
+std::tuple<std::vector<Label>, PortId, PortId> Site::calculateNextHop(std::vector<Label> labelStack, PortId entryPort)
 {
     NextHopCalculator calculator(this);
     RouterId id = getRouterId(entryPort);
     std::cout<<"id "<<id<<std::endl;
     std::cout<<"size "<<routers[id]->getIlmTable()->size()<<std::endl;
     std::cout<<"size "<<routers[id]->getNhlfeTable()->size()<<std::endl;
-    for(auto i : *(routers[id]->getIlmTable()))
-    {
-        std::cout<<"Ilm entry :"<<i.token<<" "<<i.inPort<<" "<<i.inLabel<<std::endl;
-    }
 
     auto result = calculator.calculateNextHop(labelStack, entryPort, routers[id]->getIlmTable(), routers[id]->getNhlfeTable());
 
 
-    labelStack = std::get<0>(result);
     return result;
     /*
     std::shared_ptr<std::vector<IlmEntry> > ilmTable = routers[id]->getIlmTable();
@@ -170,7 +165,6 @@ std::tuple<std::vector<Label>, PortId, PortId> Site::calculateNextHop(RouterId i
     std::cout<<"calculateNextHopSite 1"<<std::endl;
     auto result = calculator.calculateNextHop(fec, routers[id]->getFtnTable(), routers[id]->getNhlfeTable());
     std::cout<<"calculateNextHopSite 2"<<std::endl;
-    labelStack = std::get<0>(result);
     return result;
 /*
     std::vector<Label> outLabels;

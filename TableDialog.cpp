@@ -115,10 +115,11 @@ QTableWidget* TableDialog::createIlmTable()
 {
     int row=0;
     ilmTab = new QTableWidget((int)ilmTable->size()+1,4 );
+    ilmTab->setAttribute(Qt::WA_AlwaysShowToolTips);
     for(IlmEntry ilmElement : *ilmTable)
     {
         QTableWidgetItem *tableItem = new QTableWidgetItem;
-        tableItem->setText(QString::number(ilmElement.inLabel));
+        tableItem->setText(QString::fromUtf8(serializeLabels(ilmElement.inLabels).c_str()));
         ilmTab->setItem(row, 0, tableItem);
         tableItem->setFlags(tableItem->flags() & ~Qt::ItemIsEditable);
 
@@ -216,6 +217,7 @@ void TableDialog::createAddRow(QTableWidget *table, int row, int columns, std::s
     }
     else if(objectName == ILM_TABLE_ID)
     {
+        table->item(row,0)->setToolTip("use / to divide multiple labels. Put top label on the right");
         QComboBox* portsComboBox = new QComboBox;
         fillPortsComboBox(portsComboBox, inputPorts);
         table->setCellWidget(row,1,portsComboBox);
@@ -280,15 +282,7 @@ void TableDialog::addRowInNhlfeTable()
             showMessageBox(PROVIDE_LABELS_ERROR);
             return;
         }
-        char* labelsChar = const_cast<char*>(labelsString.c_str());
-        std::cout<<labelsChar<<std::endl;
-        std::vector<Label> labels;
-        const char * pch = strtok(labelsChar,"/");
-        while (pch != NULL)
-        {
-            labels.push_back(std::stoi(pch));
-            pch = strtok(NULL, "/");
-        }
+        std::vector<Label> labels = labelsStackFromString(labelsString);
         int selectedPortIndex = qobject_cast<QComboBox*>(nhlfeTab->cellWidget(row, 3))->currentIndex();
         auto it = outputPorts.begin();
         std::advance(it, selectedPortIndex);
@@ -304,23 +298,21 @@ void TableDialog::addRowInNhlfeTable()
 void TableDialog::addRowInIlmTable()
 {
     int row = (int)ilmTable->size();
-    std::string item1 = ilmTab->item(row, 0)->text().toStdString();
+    std::string labelsString = ilmTab->item(row, 0)->text().toStdString();
     int selectedPortIndex = qobject_cast<QComboBox*>(ilmTab->cellWidget(row, 1))->currentIndex();
     auto it = inputPorts.begin();
     std::advance(it, selectedPortIndex);
     PortId inPort = it->first;
     std::string item3 = ilmTab->item(row, 2)->text().toStdString();
-    if(item1.empty()||item3.empty())
+    if(labelsString.empty()||item3.empty())
     {
         showMessageBox(CORRECT_EMPTY_FIELDS_ERROR);
     }
     else
     {
-        Label inLabel = std::stoi (item1);
         Token token = std::stoi(item3);
-        std::cout<<inLabel<<" "<<inPort<<" "<<token<<std::endl;
-
-        std::string error = nodesEditor->addIlmEntry(id, IlmEntry(inLabel, inPort, token));
+        std::vector<Label> labels = labelsStackFromString(labelsString);
+        std::string error = nodesEditor->addIlmEntry(id, IlmEntry(labels, inPort, token));
         if(!error.empty())
         {
             showMessageBox(error);
@@ -415,4 +407,21 @@ void TableDialog::repopulateOutputPortsList()
     outputPorts = router->getOutputPorts();
 
     std::cout<<"size"<<outputPorts.size()<<std::endl;
+}
+
+std::vector<Label> TableDialog::labelsStackFromString(std::string labelsString)
+{
+    char* labelsChar = const_cast<char*>(labelsString.c_str());
+    std::vector<Label> labels;
+    const char * pch = strtok(labelsChar,"/");
+    while (pch != NULL)
+    {
+        labels.push_back(std::stoi(pch));
+        pch = strtok(NULL, "/");
+    }
+    for(auto i : labels)
+    {
+        std::cout<<"serializer labels "<<i<<std::endl;
+    }
+    return labels;
 }

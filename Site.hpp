@@ -41,7 +41,7 @@ public:
     std::shared_ptr<Connection> getConnection(ConnectionId);
     std::shared_ptr<Port> getPort(PortId);
     bool setRouterName(RouterId id, std::string name);
-    std::tuple<std::vector<Label>, PortId, PortId> calculateNextHop(PortId entryPort);
+    std::tuple<std::vector<Label>, PortId, PortId> calculateNextHop(std::vector<Label> labelStack, PortId entryPort);
     std::tuple<std::vector<Label>, PortId, PortId> calculateNextHop(RouterId id, FEC fec);
     PortId getConnectedPort(PortId id);
     RouterId getRouterId(PortId portId);
@@ -53,7 +53,5 @@ public:
     std::map<RouterId, std::shared_ptr<Router> > routers;
     std::map<ConnectionId, std::shared_ptr<Connection> > connections;
     std::map<PortId, std::shared_ptr<Port> > ports;
-    std::vector<Label> labelStack;
-
     
 };

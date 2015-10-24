@@ -7,22 +7,19 @@ struct IlmEntry
 {
     bool operator==(const IlmEntry& entry)
     {
-        return this->inLabel == entry.inLabel && this->inPort == entry.inPort;
+        return this->inLabels == entry.inLabels && this->inPort == entry.inPort;
     }
 
-    bool operator==(std::pair<Label, PortId> p)
-    {
-        return this->inLabel == p.first && this->inPort == p.second;
-    }
 
-    IlmEntry(Label pinLabel, PortId pinPort,Token ptoken)
+
+    IlmEntry(std::vector<Label> pinLabel, PortId pinPort,Token ptoken)
     {
-        inLabel = pinLabel;
+        inLabels = pinLabel;
         inPort = pinPort;
         token = ptoken;
     }
 
-    Label inLabel;
+    std::vector<Label> inLabels;
     PortId inPort;
     Token token;
 };

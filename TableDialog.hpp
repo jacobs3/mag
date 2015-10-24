@@ -43,6 +43,7 @@ private:
     void addRemoveButton(QTableWidget *table, std::string objectName, int row, int column);
     void createAddRow(QTableWidget *table, int row, int columns, std::string objectName);
     std::string serializeLabels(std::vector<Label> labels);
+    std::vector<Label> labelsStackFromString(std::string labelsString);
     void update();
     void showMessageBox(std::string message);
     void setTableSizePolicies(QTableWidget *table);
