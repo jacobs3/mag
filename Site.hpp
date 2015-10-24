@@ -36,15 +36,14 @@ public:
     void deleteConnection(ConnectionId);
     PortId addPort(RouterId, std::string, bool);
     void deletePort(RouterId, PortId);
-    //void setBandwith(ConnectionId);
     std::shared_ptr<Router> getRouter(RouterId);
     std::shared_ptr<Connection> getConnection(ConnectionId);
     std::shared_ptr<Port> getPort(PortId);
     bool setRouterName(RouterId id, std::string name);
     std::tuple<std::vector<Label>, PortId, PortId> calculateNextHop(std::vector<Label> labelStack, PortId entryPort);
     std::tuple<std::vector<Label>, PortId, PortId> calculateNextHop(RouterId id, FEC fec);
-    PortId getConnectedPort(PortId id);
-    RouterId getRouterId(PortId portId);
+    PortId getConnectedPort(PortId id) const;
+    RouterId getRouterId(PortId portId) const;
 
    private:
     IdGenerator<RouterId> routerIdGenerator;

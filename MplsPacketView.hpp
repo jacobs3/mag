@@ -24,17 +24,12 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 #pragma once
 
-
 #include <QtGui>
 #include <QGraphicsPathItem>
 #include <QWidget>
 #include <vector>
 
 #include "Typedefs.hpp"
-
-
-
-//class PortView;
 
 class MplsPacketView : public QWidget, public QGraphicsPathItem
 {
@@ -43,23 +38,9 @@ public:
 
     MplsPacketView(QPointF p1, QPointF p2, std::vector<Label> outLabels, QGraphicsItem *parent = 0);
     ~MplsPacketView(){}
-
-  //  void setPos1(const QPointF &p);
-//    void setPos2(const QPointF &p);
-    //void updatePosFromPorts();
-    //void updatePath();
-  //  PortView* port1() const;
-  // PortView* port2() const;
-
-
     int type() const { return Type; }
-    //ConnectionId getId();
 
 private:
-  //  static std::vector<Qt::GlobalColor> colors;
     QPointF pos1;
     QPointF pos2;
-  //  PortView *m_port1;
-  //  PortView *m_port2;
-   // ConnectionId id;
 };

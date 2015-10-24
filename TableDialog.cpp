@@ -1,7 +1,15 @@
 
 #include "TableDialog.hpp"
 #include <iterator>
-#include <string.h>
+#include <string>
+
+const std::string nhlfeTableId = "NHL";
+const std::string ilmTableId = "ILM";
+const std::string ftnTableId = "FTN";
+const std::string correctEmptyFieldsError = "Please correct empty fields";
+const std::string labelsDefWhenPopOpError = "Please remove labels when pop operation chosen";
+const std::string provideLabelsError = "Please provide labels for push or swap operation";
+const std::string multipleLabelsTooltip = "use / to divide multiple labels. Put top label on the right";
 
 std::map<LabelOperation, std::string> TableDialog::labelOperationToString = {
     {LabelOperation::pop, "Pop"},
@@ -16,9 +24,9 @@ std::map<std::string, LabelOperation> TableDialog::labelOperationFromString = {
 };
 
 std::map<std::string, AddRowFunction> TableDialog::addRowFunctions = {
-    {NHLFE_TABLE_ID, &TableDialog::addRowInNhlfeTable},
-    {ILM_TABLE_ID, &TableDialog::addRowInIlmTable},
-    {FTN_TABLE_ID, &TableDialog::addRowInFtnTable}
+    {nhlfeTableId, &TableDialog::addRowInNhlfeTable},
+    {ilmTableId, &TableDialog::addRowInIlmTable},
+    {ftnTableId, &TableDialog::addRowInFtnTable}
 };
 
 TableDialog::TableDialog(std::shared_ptr<Router> r, std::shared_ptr<IController> editor, QWidget *widget)
@@ -42,13 +50,15 @@ TableDialog::~TableDialog()
 
 std::string TableDialog::serializeLabels(std::vector<Label> labels)
 {
-    if(labels.size()==0) return "";
+    if(labels.size()==0)
+        return "";
     std::string res = std::to_string(labels[0]);
     for(auto it = labels.begin() + 1; it != labels.end(); it++)
     {
         res+="/"+std::to_string(*it);
     }
-    if(res=="/") return "";
+    if(res=="/")
+        return "";
     else return res;
 }
 
@@ -102,11 +112,11 @@ QTableWidget* TableDialog::createFtnTable()
         ftnTab->setItem(row, 1, tableItem2);
         tableItem2->setFlags(tableItem2->flags() & ~Qt::ItemIsEditable);
 
-        addRemoveButton(ftnTab, FTN_TABLE_ID, row, 2);
+        addRemoveButton(ftnTab, ftnTableId, row, 2);
         row++;
     }
     ftnTab->setColumnWidth(0,200);
-    createAddRow(ftnTab, (int)ftnTable->size(), 2, FTN_TABLE_ID);
+    createAddRow(ftnTab, (int)ftnTable->size(), 2, ftnTableId);
     ftnTab->setHorizontalHeaderLabels(QList<QString>() << QString("FEC")<<QString("Token")<<QString("Action"));
     return ftnTab;
 }
@@ -133,11 +143,11 @@ QTableWidget* TableDialog::createIlmTable()
         ilmTab->setItem(row, 2, tableItem3);
         tableItem3->setFlags(tableItem3->flags() & ~Qt::ItemIsEditable);
 
-        addRemoveButton(ilmTab, ILM_TABLE_ID, row, 3);
+        addRemoveButton(ilmTab, ilmTableId, row, 3);
         row++;
     }
 
-    createAddRow(ilmTab, (int)ilmTable->size(), 3, ILM_TABLE_ID);
+    createAddRow(ilmTab, (int)ilmTable->size(), 3, ilmTableId);
     ilmTab->setHorizontalHeaderLabels(QList<QString>() << QString("In label")<<QString("In port")<<QString("Token")<<QString("Action"));
     return ilmTab;
 }
@@ -171,11 +181,11 @@ QTableWidget* TableDialog::createNhlfeTable()
         nhlfeTab->setItem(row, 3, tableItem4);
         tableItem4->setFlags(tableItem4->flags() & ~Qt::ItemIsEditable);
 
-        addRemoveButton(nhlfeTab, NHLFE_TABLE_ID, row, 4);
+        addRemoveButton(nhlfeTab, nhlfeTableId, row, 4);
         row++;
     }
 
-    createAddRow(nhlfeTab, (int)nhlfeTable->size(), 4, NHLFE_TABLE_ID);
+    createAddRow(nhlfeTab, (int)nhlfeTable->size(), 4, nhlfeTableId);
     nhlfeTab->setHorizontalHeaderLabels(QList<QString>() << QString("Token")<<QString("Out label")<<QString("Operation")<<QString("Out port")<<QString("Action"));
     return nhlfeTab;
 }
@@ -201,9 +211,9 @@ void TableDialog::createAddRow(QTableWidget *table, int row, int columns, std::s
     btnAdd->setObjectName(QString::fromUtf8(objectName.c_str()) + " " + QString::number(row));
     table->setCellWidget(row,columns,(QWidget*)btnAdd);
     connect(btnAdd, SIGNAL(pressed()), this, SLOT(addRow()));
-    if(objectName == NHLFE_TABLE_ID)
+    if(objectName == nhlfeTableId)
     {
-        table->item(row,1)->setToolTip("use / to divide multiple labels. Put top label on the right");
+        table->item(row,1)->setToolTip(QString::fromUtf8(multipleLabelsTooltip.c_str()));
         QComboBox* combo = new QComboBox();
         for(auto item : labelOperationFromString)
         {
@@ -215,9 +225,9 @@ void TableDialog::createAddRow(QTableWidget *table, int row, int columns, std::s
         fillPortsComboBox(portsComboBox, outputPorts);
         table->setCellWidget(row,3,portsComboBox);
     }
-    else if(objectName == ILM_TABLE_ID)
+    else if(objectName == ilmTableId)
     {
-        table->item(row,0)->setToolTip("use / to divide multiple labels. Put top label on the right");
+        table->item(row,0)->setToolTip(QString::fromUtf8(multipleLabelsTooltip.c_str()));
         QComboBox* portsComboBox = new QComboBox;
         fillPortsComboBox(portsComboBox, inputPorts);
         table->setCellWidget(row,1,portsComboBox);
@@ -230,15 +240,15 @@ void TableDialog::removeRow()
     std::string tableName = objectName.substr(0,3);
     std::string rowFromName = objectName.substr(4,4);
     int row = std::stoi(rowFromName);
-    if(tableName==ILM_TABLE_ID)
+    if(tableName==ilmTableId)
     {
         nodesEditor->removeIlmEntry(id, ilmTable->at(row));
     }
-    else if(tableName==FTN_TABLE_ID)
+    else if(tableName==ftnTableId)
     {
         nodesEditor->removeFtnEntry(id, ftnTable->at(row));
     }
-    else if(tableName==NHLFE_TABLE_ID)
+    else if(tableName==nhlfeTableId)
     {
         nodesEditor->removeNhlfeEntry(id, nhlfeTable->at(row));
     }
@@ -265,7 +275,7 @@ void TableDialog::addRowInNhlfeTable()
     std::string item = nhlfeTab->item(row, 0)->text().toStdString();
     if(item.empty())
     {
-        showMessageBox(CORRECT_EMPTY_FIELDS_ERROR);
+        showMessageBox(correctEmptyFieldsError);
     }
     else
     {
@@ -274,12 +284,12 @@ void TableDialog::addRowInNhlfeTable()
         std::string labelsString = nhlfeTab->item(row, 1)->text().toStdString();
         if(operation == LabelOperation::pop&&!labelsString.empty())
         {
-            showMessageBox(LABELS_DEFINED_WHEN_POP_ERROR);
+            showMessageBox(labelsDefWhenPopOpError);
             return;
         }
         if((operation == LabelOperation::swap || operation == LabelOperation::push) && labelsString.empty())
         {
-            showMessageBox(PROVIDE_LABELS_ERROR);
+            showMessageBox(provideLabelsError);
             return;
         }
         std::vector<Label> labels = labelsStackFromString(labelsString);
@@ -306,7 +316,7 @@ void TableDialog::addRowInIlmTable()
     std::string item3 = ilmTab->item(row, 2)->text().toStdString();
     if(labelsString.empty()||item3.empty())
     {
-        showMessageBox(CORRECT_EMPTY_FIELDS_ERROR);
+        showMessageBox(correctEmptyFieldsError);
     }
     else
     {
@@ -327,7 +337,7 @@ void TableDialog::addRowInFtnTable()
     std::string item2 = ftnTab->item(row, 1)->text().toStdString();
     if(fec.empty()||item2.empty())
     {
-        showMessageBox(CORRECT_EMPTY_FIELDS_ERROR);
+        showMessageBox(correctEmptyFieldsError);
     }
     else
     {
@@ -338,7 +348,6 @@ void TableDialog::addRowInFtnTable()
             showMessageBox(error);
         }
     }
-
 }
 
 void TableDialog::showMessageBox(std::string message)
@@ -405,8 +414,6 @@ void TableDialog::repopulateOutputPortsList()
 {
     outputPorts.clear();
     outputPorts = router->getOutputPorts();
-
-    std::cout<<"size"<<outputPorts.size()<<std::endl;
 }
 
 std::vector<Label> TableDialog::labelsStackFromString(std::string labelsString)
@@ -418,10 +425,6 @@ std::vector<Label> TableDialog::labelsStackFromString(std::string labelsString)
     {
         labels.push_back(std::stoi(pch));
         pch = strtok(NULL, "/");
-    }
-    for(auto i : labels)
-    {
-        std::cout<<"serializer labels "<<i<<std::endl;
     }
     return labels;
 }

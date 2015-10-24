@@ -10,8 +10,6 @@ struct IlmEntry
         return this->inLabels == entry.inLabels && this->inPort == entry.inPort;
     }
 
-
-
     IlmEntry(std::vector<Label> pinLabel, PortId pinPort,Token ptoken)
     {
         inLabels = pinLabel;

@@ -3,17 +3,18 @@
 #include <algorithm>
 #include <list>
 
+const std::string ftnEntryExistsError = "Given FEC exists";
+const std::string ilmEntryExistsError = "Given inLabel, inPort pair exists";
+const std::string nhlfeEntryExistsError = "Given token exists";
+const std::string routerNamePrefix = "Router";
+
 Router::Router(RouterId routerId)
 {
     id=routerId;
-    name="Router" + std::to_string(id);
+    name=routerNamePrefix + std::to_string(id);
     ilmTable = std::make_shared<std::vector<IlmEntry> >();
     ftnTable = std::make_shared<std::vector<FtnEntry> >();
     nhlfeTable = std::make_shared<std::vector<NhlfeEntry> >();
-}
-
-Router::~Router()
-{
 }
 
 void Router::setName(std::string routerName)
@@ -40,11 +41,8 @@ void Router::addInputPort(PortId id, std::shared_ptr<Port> port)
 
 void Router::addOutputPort(PortId id, std::shared_ptr<Port> port)
 {
-    std::cout<<"add port 1"<<std::endl;
     outputPorts[id] = port;
-    std::cout<<"add port 2"<<std::endl;
     update();
-    std::cout<<"add port 3"<<std::endl;
 }
 
 void Router::removeInputPort(PortId id)
@@ -122,17 +120,17 @@ std::map<PortId, std::shared_ptr<Port> > Router::getPorts()
     return ports;
 }
 
-std::shared_ptr<std::vector<IlmEntry> > Router::getIlmTable()
+std::shared_ptr<std::vector<IlmEntry> > Router::getIlmTable() const
 {
     return ilmTable;
 }
 
-std::shared_ptr<std::vector<FtnEntry> > Router::getFtnTable()
+std::shared_ptr<std::vector<FtnEntry> > Router::getFtnTable() const
 {
     return ftnTable;
 }
 
-std::shared_ptr<std::vector<NhlfeEntry> > Router::getNhlfeTable()
+std::shared_ptr<std::vector<NhlfeEntry> > Router::getNhlfeTable() const
 {
     return nhlfeTable;
 }
@@ -142,7 +140,7 @@ std::string Router::addNhlfeEntry(NhlfeEntry entry)
     auto findIt = std::find(nhlfeTable->begin(),nhlfeTable->end(), entry);
     if (findIt != nhlfeTable->end())
     {
-        return "Given token exists.";
+        return nhlfeEntryExistsError;
     }
     else
     {
@@ -171,7 +169,7 @@ std::string Router::addIlmEntry(IlmEntry entry)
     auto findIt = std::find(ilmTable->begin(),ilmTable->end(), entry);
     if (findIt != ilmTable->end())
     {
-        return "Given inLabel, inPort pair exists.";
+        return ilmEntryExistsError;
     }
     else
     {
@@ -215,11 +213,10 @@ void Router::removeIlmEntry(IlmEntry entry)
 
 std::string Router::addFtnEntry(FtnEntry entry)
 {
-    std::cout<<"addFtn"<<std::endl;
     auto findIt = std::find(ftnTable->begin(),ftnTable->end(), entry);
     if (findIt != ftnTable->end())
     {
-        return "Given FEC exists.";
+        return ftnEntryExistsError;
     }
     else
     {

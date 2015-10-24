@@ -43,21 +43,14 @@ public:
     void setNEBlock(RouterView*);
 	void setName(const QString &n);
     void setIsInput(bool isIn);
-	int radius();
-    bool getIsInput();
-    QVector<ConnectionView*>& connections();
-	void setPortFlags(int);
-
-	const QString& portName() const { return name; }
-	int portFlags() const { return m_portFlags; }
-
+    int getRadius() const;
+    bool getIsInput() const;
+    QVector<ConnectionView*>& getConnections();
+    const QString& getPortName() const;
 	int type() const { return Type; }
-    PortId getId();
-
-    RouterView* block() const;
-
-
-    bool isConnected();
+    PortId getId() const;
+    RouterView* getBlock() const;
+    bool isConnected() const;
     void setConnected(bool pisConnected);
     void setId(PortId);
 

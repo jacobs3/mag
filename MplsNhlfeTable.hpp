@@ -40,7 +40,5 @@ struct NhlfeEntry
     PortId outPort;
     Token token;
     LabelOperation operation;
-    //std::string nextHop;
     std::vector<Label> outLabel;
-
 };

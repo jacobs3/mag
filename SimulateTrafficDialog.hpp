@@ -12,7 +12,6 @@
 #include <vector>
 #include <memory>
 
-
 class SimulateTrafficDialog : public QDialog, IObserver
 {
     Q_OBJECT
@@ -45,5 +44,4 @@ private:
     std::shared_ptr<Router> router;
     RouterId id;
     std::vector<FEC> fecs;
-
 };

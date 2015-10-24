@@ -1,13 +1,10 @@
 #include "IObservable.hpp"
-#include <iostream>
 
 void IObservable::update()
 {
     for(auto o :observers)
     {
-        std::cout<<"update";
         if(o) o->update();
-        std::cout<<"update2";
     }
 }
 

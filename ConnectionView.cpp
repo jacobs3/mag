@@ -30,7 +30,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 #include <QPen>
 #include <QGraphicsScene>
 
-#include <iostream>
 ConnectionView::ConnectionView(ConnectionId connId, QGraphicsItem *parent) : QGraphicsPathItem(parent)
 {
     id = connId;
@@ -60,39 +59,25 @@ void ConnectionView::setPos2(const QPointF &p)
 
 void ConnectionView::setPort1(PortView *p)
 {
-    std::cout<<"set port 1"<<p<<std::endl;
 	m_port1 = p;
-
-	m_port1->connections().append(this);
+    m_port1->getConnections().append(this);
 }
 
 void ConnectionView::setPort2(PortView *p)
 {
-    std::cout<<"set port 2"<<std::endl;
 	m_port2 = p;
-
-	m_port2->connections().append(this);
+    m_port2->getConnections().append(this);
 }
 
 void ConnectionView::updatePosFromPorts()
 {
-    if(m_port1)
-    {
-        pos1 = m_port1->scenePos();
-    }
-
-    if(m_port2)
-    {
-        pos2 = m_port2->scenePos();
-    }
+    if(m_port1) pos1 = m_port1->scenePos();
+    if(m_port2) pos2 = m_port2->scenePos();
 }
 
 void ConnectionView::updatePath()
 {
 	QPainterPath p;
-
-	//QPointF pos1(m_port1->scenePos());
-	//QPointF pos2(m_port2->scenePos());
 
 	p.moveTo(pos1);
 
@@ -117,26 +102,7 @@ PortView* ConnectionView::port2() const
 	return m_port2;
 }
 
-void ConnectionView::save(QDataStream &ds)
-{
-	ds << (quint64) m_port1;
-	ds << (quint64) m_port2;
-}
-
-void ConnectionView::load(QDataStream &ds, const QMap<quint64, PortView*> &portMap)
-{
-	quint64 ptr1;
-	quint64 ptr2;
-	ds >> ptr1;
-	ds >> ptr2;
-
-	setPort1(portMap[ptr1]);
-	setPort2(portMap[ptr2]);
-	updatePosFromPorts();
-	updatePath();
-}
-
-ConnectionId ConnectionView::getId()
+ConnectionId ConnectionView::getId() const
 {
     return id;
 }

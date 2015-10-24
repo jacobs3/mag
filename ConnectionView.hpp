@@ -24,10 +24,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 #pragma once
 
-
 #include <QGraphicsPathItem>
 #include "Typedefs.hpp"
-
 
 class PortView;
 
@@ -47,12 +45,8 @@ public:
 	void updatePath();
     PortView* port1() const;
     PortView* port2() const;
-
-	void save(QDataStream&);
-    void load(QDataStream&, const QMap<quint64, PortView*> &portMap);
-
 	int type() const { return Type; }
-    ConnectionId getId();
+    ConnectionId getId() const;
 
 private:
 	QPointF pos1;

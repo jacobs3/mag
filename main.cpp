@@ -3,9 +3,7 @@
 #include "Site.hpp"
 #include <QtWidgets>
 #include <QApplication>
-#include <iostream>
 #include <memory>
-
 
 int main(int argc, char *argv[])
 {

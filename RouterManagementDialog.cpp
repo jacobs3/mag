@@ -1,4 +1,3 @@
-
 #include "RouterManagementDialog.hpp"
 #include <iterator>
 
@@ -29,7 +28,6 @@ RouterManagementDialog::RouterManagementDialog(std::shared_ptr<Router> r, std::s
     leftLayout->addWidget(routerNameField);
     rightLayout->addWidget(routerNameButton);
 
-
     QHBoxLayout *renamePortLayout = new QHBoxLayout;
     renamePortsComboBox = new QComboBox;
     renamePortsComboBox->setFixedWidth(100);
@@ -42,7 +40,6 @@ RouterManagementDialog::RouterManagementDialog(std::shared_ptr<Router> r, std::s
     setButtonSize(portNameButton);
     connect(portNameButton, SIGNAL(pressed()),
                          this, SLOT(setPortName()));
-
 
     renamePortLayout->addWidget(renamePortsComboBox);
     renamePortLayout->addWidget(portNameField);
@@ -60,7 +57,6 @@ RouterManagementDialog::RouterManagementDialog(std::shared_ptr<Router> r, std::s
     leftLayout->addWidget(removePortsComboBox);
     rightLayout->addWidget(removePortButton);
 
-
     QHBoxLayout *addPortLayout = new QHBoxLayout;
     addPortNameField = new QLineEdit (tr("portName"));
     addPortNameField->setText(tr("portName"));
@@ -76,7 +72,6 @@ RouterManagementDialog::RouterManagementDialog(std::shared_ptr<Router> r, std::s
     leftLayout->addLayout(addPortLayout);
     rightLayout->addWidget(addPortButton);
 
-
     mainLayout->addLayout(leftLayout);
     mainLayout->addLayout(rightLayout);
 
@@ -88,10 +83,8 @@ void RouterManagementDialog::setButtonSize(QPushButton *b)
     b->setFixedSize(QSize(100,22));
 }
 
-
 void RouterManagementDialog::setRouterName()
 {
-    std::cout<<"router name"<<routerNameField->text().toStdString()<<std::endl;
     if(!nodesEditor->setRouterName(id, routerNameField->text().toStdString()))
     {
         QMessageBox msgBox;

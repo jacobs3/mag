@@ -30,13 +30,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 #include "MainWindow.hpp"
 #include <QEvent>
 
+static const std::string noPreviousPacketsError = "No previous packets to display";
+
 
 Editor::Editor(MainWindow *mainWindow, QMainWindow *parent)
    : IController(parent), view(mainWindow)
 {
     this->setContextMenuPolicy(Qt::CustomContextMenu);
     conn = 0;
-
 }
 
 void Editor::install(QGraphicsScene *s)
@@ -58,11 +59,9 @@ QGraphicsItem* Editor::itemAt(const QPointF &pos)
 
 void Editor::handleRouterMenu(QGraphicsSceneMouseEvent *me)
 {
-
     RouterView *item = (RouterView*)itemAt(me->scenePos());
     QMenu contextMenu(tr("Router menu"), this);
     QAction *action1=new QAction("Router management", this);
-   // connect(action1, SIGNAL(triggered()), this, SLOT(cout1()));
     contextMenu.addAction(action1);
     QAction *action2=new QAction("Label management", this);
     contextMenu.addAction(action2);
@@ -72,7 +71,6 @@ void Editor::handleRouterMenu(QGraphicsSceneMouseEvent *me)
     contextMenu.addAction(action4);
 
     QAction* calledItem=  contextMenu.exec(me->screenPos());
-    item->getId();
     if(calledItem == action1)
     {
         view->showRouterDialog(site->getRouter(item->getId()));
@@ -99,25 +97,12 @@ void Editor::handleLinkMenu(QGraphicsSceneMouseEvent *me)
 
     QAction *action1 = new QAction("Remove link", this);
     contextMenu.addAction(action1);
-    QAction *action2 = new QAction("Define link parameters", this);
-    contextMenu.addAction(action2);
-    QAction *action3 = new QAction("Trigger link outage", this);
-    contextMenu.addAction(action3);
-
-    QAction* calledItem = contextMenu.exec(mapToGlobal(me->scenePos().toPoint()));
-
+    QAction* calledItem = contextMenu.exec(me->screenPos());
 
     if(calledItem == action1)
     {
-       // item->onDelete();
          site->deleteConnection(item->getId());
          delete item;
-    }
-    else if(calledItem == action2)
-    {
-    }
-    else if(calledItem == action3)
-    {
     }
 }
 
@@ -145,16 +130,7 @@ bool Editor::eventFilter(QObject *o, QEvent *e)
 				conn->updatePath();
 
 				return true;
-            } else if (item && item->type() == RouterView::Type)
-            {
-                std::cout<<"7";
-                conn = nullptr;
             }
-			{
-               //  if (selBlock)
-                 //   selBlock->setSelected();
-				// selBlock = (QNEBlock*) item;
-			}
 			break;
 		}
 		case Qt::RightButton:
@@ -165,58 +141,13 @@ bool Editor::eventFilter(QObject *o, QEvent *e)
             setContextMenuPolicy(Qt::CustomContextMenu);
             if (item && item->type() == ConnectionView::Type)
             {
-                std::cout<<"6";
                 handleLinkMenu(me);
 
             }
             else if(item && item->type() == RouterView::Type)
             {
-                std::cout<<"5";
                 handleRouterMenu(me);
             }
-                //delete item;
-
-
-
-
-               /*   m_1 = m_pContextMenu->addAction("Set Size 100x100");
-                  m_2 = m_pContextMenu->addAction("Set Size 200x200");
-
-
-
-= m_pContextMenu->addAction("Set Size 300x300");
-                  m_4 = m_pContextMenu->addAction("Set Size 400x400");
-                     //m_pContextMenu->exec(mapToGlobal(pos));
-
-                  connect(this,	       SIGNAL(customContextMenuRequested(const QPoint)),this,
-                      SLOT(contextMenuRequested(QPoint)));
-                  connect(m_1,SIGNAL(triggered()),this,SLOT(cout1()));
-                  connect(m_2,SIGNAL(triggered()),this,SLOT(cout2()));
-                  connect(m_3,SIGNAL(triggered()),this,SLOT(cout3()));
-                  connect(m_4,SIGNAL(triggered()),this,SLOT(cout4()));*/
-
-
-//std::cout<<"ABCx "<<abc.x()<<std::endl;
-//std::cout<<"ABCy "<<abc.y()<<std::endl;
-//QPointF par;
-//par = item->boundingRect().center();
-//QPointF par = mapToParent(abc.toPoint());
-//std::cout<<"parx "<<par.x()<<std::endl;
-//std::cout<<"pary "<<par.y()<<std::endl;
-/*QPointF par2 = mapFromParent(abc.toPoint());
-std::cout<<"par2x "<<par2.x()<<std::endl;
-std::cout<<"par2y "<<par2.y()<<std::endl;
-QPointF g = mapFromGlobal(abc.toPoint());
-std::cout<<"gx "<<g.x()<<std::endl;
-std::cout<<"gy "<<g.y()<<std::endl;*/
-//std::cout<<"x "<<abc.toPoint().x()<<std::endl;
-//std::cout<<"y "<<abc.toPoint().y()<<std::endl;
-
-
-
-
-			// if (selBlock == (QNEBlock*) item)
-				// selBlock = 0;
             break;
 		}
 		}
@@ -233,18 +164,14 @@ std::cout<<"gy "<<g.y()<<std::endl;*/
 	}
 	case QEvent::GraphicsSceneMouseRelease:
 	{
-        std::cout<<"3";
 		if (conn && me->button() == Qt::LeftButton)
 		{
-            std::cout<<"4";
 			QGraphicsItem *item = itemAt(me->scenePos());
             PortView *port1 = conn->port1();
             PortView *port2 = (PortView*) item;
             if (item && item->type() == PortView::Type)
 			{
-
-
-                if (port1->block() != port2->block() && port1->getIsInput() != port2->getIsInput() && !port2->isConnected())
+                if (port1->getBlock() != port2->getBlock() && port1->getIsInput() != port2->getIsInput() && !port2->isConnected())
                 {
                     port2->setConnected(true);
 					conn->setPos2(port2->scenePos());
@@ -254,11 +181,10 @@ std::cout<<"gy "<<g.y()<<std::endl;*/
                     conn = nullptr;
 					return true;
                 }
-
 			}
             else
             {
-                port1->connections().clear();
+                port1->getConnections().clear();
             }
             delete conn;
             conn = nullptr;
@@ -269,25 +195,6 @@ std::cout<<"gy "<<g.y()<<std::endl;*/
 	}
     return QObject::eventFilter(o, e);
 }
-
-
-/*
-void Editor::contextMenuRequested(const QPoint &pos)
-{
-   QMenu contextMenu(tr("Context menu"), this);
-
-   QAction action1("Remove Data Point", this);
-   connect(&action1, SIGNAL(triggered()), this, SLOT(cout1()));
-   contextMenu.addAction(&action1);
-
-   contextMenu.exec(mapToGlobal(pos));
-}
-
-/*void Editor::contextMenuRequested(const QPoint &pos)
-{
-
-   contextMenu.exec(mapToGlobal(pos));
-}*/
 
 void Editor::addRouter()
 {
@@ -300,14 +207,6 @@ void Editor::addRouter()
     view->addPort(id, inputPortId, "in", true);
     view->addPort(id, outputPortId, "out", false);
 }
-
-void Editor::deleteItem(QWidget *item)
-{
-
-    delete item;
-}
-
-
 
 bool Editor::setRouterName(RouterId id, std::string name)
 {
@@ -373,7 +272,6 @@ std::string Editor::displayNextMplsPacket()
         lastMplsPackets.push(site->calculateNextHop(labelStack, nextHopPort));
         nextHopPort = std::get<2>(lastMplsPackets.top());
         labelStack = std::get<0>(lastMplsPackets.top());
-        std::cout<<"next Hop "<<nextHopPort<<std::endl;
         view->showMplsPacket(std::get<1>(lastMplsPackets.top()), std::get<2>(lastMplsPackets.top()),
                              std::get<0>(lastMplsPackets.top()));
     }
@@ -388,15 +286,11 @@ std::string Editor::displayNextMplsPacket(RouterId id, FEC fec)
 {
     try
     {
-        std::cout<<"displayNextMplsPacket 1"<<std::endl;
         lastMplsPackets.push(site->calculateNextHop(id, fec));
-        std::cout<<"displayNextMplsPacket 2"<<std::endl;
         nextHopPort = std::get<2>(lastMplsPackets.top());
         labelStack = std::get<0>(lastMplsPackets.top());
-        std::cout<<"next Hop "<<nextHopPort<<std::endl;
         view->showMplsPacket(std::get<1>(lastMplsPackets.top()), std::get<2>(lastMplsPackets.top()),
                              std::get<0>(lastMplsPackets.top()));
-        std::cout<<"displayNextMplsPacket 3"<<std::endl;
     }
     catch(std::runtime_error e)
     {
@@ -407,23 +301,19 @@ std::string Editor::displayNextMplsPacket(RouterId id, FEC fec)
 
 std::string Editor::displayPrevMplsPacket()
 {
-    std::cout<<"prev 1 "<<lastMplsPackets.size()<<std::endl;
     auto tmp = lastMplsPackets.top();
     lastMplsPackets.pop();
     if(lastMplsPackets.size() > 0 )
     {
-        std::cout<<"prev 2"<<std::endl;
         view->showMplsPacket(std::get<1>(lastMplsPackets.top()), std::get<2>(lastMplsPackets.top()),
                              std::get<0>(lastMplsPackets.top()));
-
         labelStack = std::get<0>(lastMplsPackets.top());
         nextHopPort = std::get<2>(lastMplsPackets.top());
-        std::cout<<"next Hop "<<nextHopPort<<std::endl;
     }
     else
     {
         lastMplsPackets.push(tmp);
-        return "No previous packets to display";
+        return noPreviousPacketsError;
     }
     return "";
 }

@@ -1,17 +1,16 @@
 #pragma once
 
+#include <QMainWindow>
+#include <QtWidgets>
+#include <list>
+#include <memory>
+
+#include "Typedefs.hpp"
+#include "Router.hpp"
 #include "UiMainWindow.hpp"
 #include "RouterView.hpp"
 #include "IController.hpp"
 #include "IObserver.hpp"
-
-#include <QMainWindow>
-#include <QtWidgets>
-#include "Typedefs.hpp"
-#include "Router.hpp"
-#include <list>
-#include <memory>
-
 
 class RouterManagementDialog : public QDialog, IObserver
 {

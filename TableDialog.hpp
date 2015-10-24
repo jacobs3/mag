@@ -14,20 +14,12 @@
 #include <memory>
 #include <map>
 
-#define NHLFE_TABLE_ID "NHL"
-#define ILM_TABLE_ID "ILM"
-#define FTN_TABLE_ID "FTN"
-#define CORRECT_EMPTY_FIELDS_ERROR "Please correct empty fields"
-#define LABELS_DEFINED_WHEN_POP_ERROR "Please remove labels when pop operation chosen"
-#define PROVIDE_LABELS_ERROR "Please provide labels for push or swap operation"
-
 class TableDialog;
 typedef void (TableDialog::*AddRowFunction)(void);
 
 class TableDialog : public QDialog, IObserver
 {
     Q_OBJECT
-
 public:
     explicit TableDialog(std::shared_ptr<Router>, std::shared_ptr<IController>, QWidget*);
     ~TableDialog();
@@ -65,9 +57,6 @@ private:
     QTableWidget* nhlfeTab, *ilmTab, *ftnTab;
     QTabWidget *tabs;
     QVBoxLayout *layout;
- //   void subscribeForUpdate();
- //   void repopulatePortNamesList();
- //   void fillPortsComboBox(QComboBox *combo);
     QLineEdit *routerNameField;
     QLineEdit *portNameField;
     QLineEdit *addPortNameField;

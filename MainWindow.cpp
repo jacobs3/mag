@@ -49,45 +49,27 @@ void MainWindow::setController(std::shared_ptr<IController> c)
 
 void MainWindow::start()
 {
-
     dock = new QDockWidget(tr("View"), this);
     dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     view = new QGraphicsView(dock);
     view->setScene(scene);
-
     view->setRenderHint(QPainter::Antialiasing, true);
-
     dock->setWidget(view);
     addDockWidget(Qt::LeftDockWidgetArea, dock);
-
-
     nodesEditor->install(scene);
-
-
     QAction *addAct = new QAction(tr("&Add"), this);
     addAct->setStatusTip(tr("Add a router"));
     IController* tmp = nodesEditor.get();
-
     connect(addAct, SIGNAL(triggered()), tmp, SLOT(addRouter()));
-
     QAction *quitAct = new QAction(tr("&Exit"), this);
     quitAct->setStatusTip(tr("Quit application"));
     connect(quitAct, SIGNAL(triggered()), QApplication::instance(), SLOT(quit()));
-
     fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->addAction(addAct);
     fileMenu->addSeparator();
     fileMenu->addAction(quitAct);
-
     resize(QDesktopWidget().availableGeometry(this).size() * 0.7);
 }
-
-MainWindow::~MainWindow()
-{
-
-}
-
-
 
 void MainWindow::addRouter(RouterId routerId)
 {
@@ -121,14 +103,11 @@ void MainWindow::refreshPortName(PortId portId, std::string name)
 void MainWindow::showContextMenu(const QPoint &pos)
 {
    QMenu contextMenu(tr("Context menu"), this);
-
    QAction action1("Remove Data Point", this);
    connect(&action1, SIGNAL(triggered()), this, SLOT(quit()));
    contextMenu.addAction(&action1);
-
    contextMenu.exec(mapToGlobal(pos));
 }
-
 
 void MainWindow::showRouterDialog(std::shared_ptr<Router> router)
 {

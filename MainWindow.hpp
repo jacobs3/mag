@@ -47,6 +47,7 @@ class MainWindow : public QMainWindow, IObserver
 
 public:
     explicit MainWindow(QWidget *parent = 0);
+    ~MainWindow(){}
     void showRouterDialog(std::shared_ptr<Router> router);
     void showTableDialog(std::shared_ptr<Router> router);
     void showSimulateTrafficDialog(std::shared_ptr<Router> router);
@@ -59,7 +60,6 @@ public:
     void update();
     void showMplsPacket(PortId startPortId, PortId endPortId, std::vector<Label> outLabels);
     void eraseMplsPacket();
-    ~MainWindow();
 
 private slots:
     void showContextMenu(const QPoint& pos);

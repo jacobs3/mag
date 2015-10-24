@@ -1,6 +1,9 @@
 
 #include "SimulateTrafficDialog.hpp"
 #include <iterator>
+#include <string>
+
+const std::string noAvailableFecError ="No available FEC. Please define new FEC for this router";
 
 SimulateTrafficDialog::SimulateTrafficDialog(std::shared_ptr<Router> r, std::shared_ptr<IController> editor, QMainWindow *widget)
 : QDialog(widget)
@@ -62,13 +65,11 @@ void SimulateTrafficDialog::handleStartButton()
 {
     if(fecComboBox->count() == 0)
     {
-        showMessageBox("No available FEC. Please define new FEC for this router");
+        showMessageBox(noAvailableFecError);
     }
     else
     {
-        std::cout<<"handleStartButton 1"<<std::endl;
         std::string result = nodesEditor->displayNextMplsPacket(id, fecComboBox->currentText().toStdString());
-        std::cout<<"handleStartButton 1"<<std::endl;
         if(!result.empty())
         {
             showMessageBox(result);
@@ -138,7 +139,6 @@ void SimulateTrafficDialog::repopulateFecList()
         fecs.push_back(entry.fec);
     }
 }
-
 
 void SimulateTrafficDialog::fillFecComboBox(QComboBox *combo)
 {

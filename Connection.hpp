@@ -7,13 +7,12 @@
 class Connection : public IObservable
 {
 public:
-    Connection(ConnectionId, PortId, PortId);
-    PortId getPort1();
-    PortId getPort2();
-    ConnectionId getId();
+    Connection(ConnectionId connId, PortId id1, PortId id2);
+    PortId getPort1() const;
+    PortId getPort2() const;
+    ConnectionId getId() const;
 private:
     ConnectionId id;
     PortId p1;
     PortId p2;
-
 };

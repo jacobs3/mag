@@ -8,15 +8,15 @@
 #include <map>
 #include "IObservable.hpp"
 #include "Port.hpp"
-#include <MplsFtnTable.hpp>
-#include <MplsIlmTable.hpp>
-#include <MplsNhlfeTable.hpp>
+#include "MplsFtnTable.hpp"
+#include "MplsIlmTable.hpp"
+#include "MplsNhlfeTable.hpp"
 
 class Router : public IObservable
 {
  public:
     Router(RouterId);
-    ~Router();
+    ~Router(){}
     void setName(std::string);
     std::string getName();
     RouterId getId();
@@ -28,21 +28,15 @@ class Router : public IObservable
     std::map<PortId, std::shared_ptr<Port> > getOutputPorts();
     std::map<PortId, std::shared_ptr<Port> > getPorts();
     void subscribe();
-
-    //void setIlmTable(std::shared_ptr<std::vector<IlmEntry> >);
-    //void setFtnTable(std::shared_ptr<std::vector<FtnEntry> >);
-    //void setNhlfeTable(std::shared_ptr<std::vector<NhlfeEntry> >);
-
     std::string addNhlfeEntry(NhlfeEntry entry);
     void removeNhlfeEntry(NhlfeEntry entry);
     std::string addIlmEntry(IlmEntry entry);
     void removeIlmEntry(IlmEntry entry);
     std::string addFtnEntry(FtnEntry entry);
     void removeFtnEntry(FtnEntry entry);
-
-    std::shared_ptr<std::vector<IlmEntry> > getIlmTable();
-    std::shared_ptr<std::vector<FtnEntry> > getFtnTable();
-    std::shared_ptr<std::vector<NhlfeEntry> > getNhlfeTable();
+    std::shared_ptr<std::vector<IlmEntry> > getIlmTable() const;
+    std::shared_ptr<std::vector<FtnEntry> > getFtnTable() const;
+    std::shared_ptr<std::vector<NhlfeEntry> > getNhlfeTable()const;
 
 private:
     std::map<PortId, std::shared_ptr<Port> > inputPorts;
@@ -52,5 +46,4 @@ private:
     std::shared_ptr<std::vector<NhlfeEntry> > nhlfeTable;
     RouterId id;
     std::string name;
-
 };
