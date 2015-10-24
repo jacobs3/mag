@@ -32,7 +32,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 #include <QPainter>
 
 #include <iostream>
-RouterView::RouterView(RouterId routerId, QGraphicsItem *parent) : QGraphicsPathItem(parent),id(routerId)
+RouterView::RouterView(RouterId routerId, QGraphicsItem *parent)
+    : QGraphicsPathItem(parent),
+      id(routerId)
 {
 	QPainterPath p;
     p.addRoundedRect(-50, -15, 100, 30, 5, 5);
@@ -65,14 +67,13 @@ int RouterView::getId()
     return id;
 }
 
-PortView* RouterView::addPort(const QString &name, bool isInput, int flags, int ptr)
+PortView* RouterView::addPort(const QString &name, bool isInput, int flags)
 {
     PortView *port = new PortView(0, this);
 	port->setName(name);
     port->setIsInput(isInput);
 	port->setNEBlock(this);
 	port->setPortFlags(flags);
-	port->setPtr(ptr);
 
 	QFontMetrics fm(scene()->font());
 	int w = fm.width(name);
@@ -167,11 +168,11 @@ void RouterView::load(QDataStream &ds, QMap<quint64, PortView*> &portMap)
 		int flags;
 		quint64 ptr;
 
-		ds >> ptr;
+        //ds >> ptr;
 		ds >> name;
 		ds >> output;
 		ds >> flags;
-		portMap[ptr] = addPort(name, output, flags, ptr);
+        portMap[ptr] = addPort(name, output, flags);
 	}
 }
 
@@ -203,7 +204,7 @@ RouterView* RouterView::clone()
         if (port_->type() == PortView::Type)
 		{
             PortView *port = (PortView*) port_;
-            b->addPort(port->portName(), port->getIsInput(), port->portFlags(), port->ptr());
+            b->addPort(port->portName(), port->getIsInput(), port->portFlags());
 		}
 	}
 

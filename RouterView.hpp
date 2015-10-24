@@ -42,7 +42,7 @@ public:
 
     RouterView(RouterId id, QGraphicsItem *parent = 0);
 
-    PortView* addPort(const QString &name, bool isInput, int flags = 0, int ptr = 0);
+    PortView* addPort(const QString &name, bool isInput, int flags = 0);
 	void addInputPort(const QString &name);
 	void addOutputPort(const QString &name);
 	void addInputPorts(const QStringList &names);

@@ -1,5 +1,9 @@
-#ifndef OBSERVER_HPP
-#define OBSERVER_HPP
+#pragma once
 
-#endif // OBSERVER_HPP
+#include "Typedefs.hpp"
 
+class IObserver
+{
+public:
+    virtual void update() = 0;
+};

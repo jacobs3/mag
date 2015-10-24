@@ -29,7 +29,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 #include <QGraphicsScene>
 #include <QFontMetrics>
 #include <QPen>
-
+#include <iostream>
 
 PortView::PortView(PortId portId, QGraphicsItem *parent):
     id(portId), QGraphicsPathItem(parent)
@@ -49,12 +49,17 @@ PortView::PortView(PortId portId, QGraphicsItem *parent):
 	setFlag(QGraphicsItem::ItemSendsScenePositionChanges);
 
 	m_portFlags = 0;
+    _isConnected = false;
 }
 
 PortView::~PortView()
 {
     foreach(ConnectionView *conn, m_connections)
-		delete conn;
+        if(conn)
+        {
+            delete conn;
+        }
+
 }
 
 void PortView::setNEBlock(RouterView* b)
@@ -66,6 +71,7 @@ void PortView::setName(const QString &n)
 {
 	name = n;
 	label->setPlainText(n);
+    setLabelPosition();
 }
 
 void PortView::setIsInput(bool isIn)
@@ -74,11 +80,15 @@ void PortView::setIsInput(bool isIn)
 
 	QFontMetrics fm(scene()->font());
 	QRect r = fm.boundingRect(name);
+    setLabelPosition();
+}
 
-    if (isIn)
-		label->setPos(-radius_ - margin - label->boundingRect().width(), -label->boundingRect().height()/2);
-	else
-		label->setPos(radius_ + margin, -label->boundingRect().height()/2);
+void PortView::setLabelPosition()
+{
+    if (isInput)
+        label->setPos(-radius_ - margin - label->boundingRect().width(), -label->boundingRect().height()/2);
+    else
+        label->setPos(radius_ + margin, -label->boundingRect().height()/2);
 }
 
 int PortView::radius()
@@ -120,23 +130,14 @@ RouterView* PortView::block() const
 	return m_block;
 }
 
-quint64 PortView::ptr()
+void PortView::setConnected(bool pisConnected)
 {
-	return m_ptr;
+    _isConnected = pisConnected;
 }
 
-void PortView::setPtr(quint64 p)
+bool PortView::isConnected()
 {
-	m_ptr = p;
-}
-
-bool PortView::isConnected(PortView *other)
-{
-    foreach(ConnectionView *conn, m_connections)
-		if (conn->port1() == other || conn->port2() == other)
-			return true;
-
-	return false;
+    return _isConnected;
 }
 
 QVariant PortView::itemChange(GraphicsItemChange change, const QVariant &value)
@@ -145,8 +146,11 @@ QVariant PortView::itemChange(GraphicsItemChange change, const QVariant &value)
 	{
         foreach(ConnectionView *conn, m_connections)
 		{
+            std::cout<<"update port 1"<<std::endl;
 			conn->updatePosFromPorts();
+             std::cout<<"update port 2"<<std::endl;
 			conn->updatePath();
+             std::cout<<"update port 3"<<std::endl;
 		}
 	}
 	return value;

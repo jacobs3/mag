@@ -11,3 +11,13 @@ ConnectionId Connection::getId()
 {
  return id;
 }
+
+PortId Connection::getPort1()
+{
+    return p1;
+}
+
+PortId Connection::getPort2()
+{
+    return p2;
+}

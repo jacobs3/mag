@@ -56,16 +56,16 @@ public:
 
     RouterView* block() const;
 
-	quint64 ptr();
-	void setPtr(quint64);
 
-    bool isConnected(PortView*);
+    bool isConnected();
+    void setConnected(bool pisConnected);
     void setId(PortId);
 
 protected:
 	QVariant itemChange(GraphicsItemChange change, const QVariant &value);
 
 private:
+    void setLabelPosition();
     RouterView *m_block;
 	QString name;
     bool isInput;
@@ -74,7 +74,7 @@ private:
 	int margin;
     QVector<ConnectionView*> m_connections;
 	int m_portFlags;
-	quint64 m_ptr;
     PortId id;
+    bool _isConnected;
 };
 

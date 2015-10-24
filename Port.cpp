@@ -15,6 +15,7 @@ std::string Port::getName()
 void Port::setName(std::string portName)
 {
     name=portName;
+    update();
 }
 
 PortId Port::getId()

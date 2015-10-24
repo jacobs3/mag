@@ -31,78 +31,63 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 #include <iostream>
 #include <QMainWindow>
 #include <QGraphicsSceneMouseEvent>
-#include "MainWindow.hpp"
-#include "Site.hpp"
-class QGraphicsScene;
-class ConnectionView;
-class QGraphicsItem;
-class QPointF;
+#include <QGraphicsScene>
+#include <QGraphicsItem>
+#include <QPointF>
+#include <memory>
+#include <tuple>
+#include <vector>
+#include <stack>
+
+#include "Typedefs.hpp"
+#include "IController.hpp"
 class RouterView;
+class MainWindow;
+class ConnectionView;
 
 
-class Editor : public QMainWindow
+
+class Editor : public IController
 {
 	Q_OBJECT
 public:
     explicit Editor(MainWindow *mainWindow, QMainWindow *parent = 0);
 
     void install(QGraphicsScene *scene);
-
-    bool eventFilter(QObject *, QEvent *);
-
-	void save(QDataStream &ds);
-	void load(QDataStream &ds);
-
     void handleRouterMenu(QGraphicsSceneMouseEvent *me);
     void handleLinkMenu(QGraphicsSceneMouseEvent *me);
-    Site& getSite();
-    void setRouterName(RouterId id, std::string name);
+
+    bool setRouterName(RouterId id, std::string name);
     void setPortName(PortId id, std::string name);
     void removePort(RouterId routerId, PortId portId);
     void addPort(RouterId routerId, std::string name, bool isInput);
+    void setModel(std::shared_ptr<Site> site);
+
+    std::string addNhlfeEntry(RouterId id, NhlfeEntry entry);
+    void removeNhlfeEntry(RouterId id, NhlfeEntry entry);
+    std::string addIlmEntry(RouterId id, IlmEntry entry);
+    void removeIlmEntry(RouterId id, IlmEntry entry);
+    std::string addFtnEntry(RouterId id, FtnEntry entry);
+    void removeFtnEntry(RouterId id, FtnEntry entry);
+    std::string displayNextMplsPacket();
+    std::string displayNextMplsPacket(RouterId id, FEC fec);
+    std::string displayPrevMplsPacket();
+    void eraseMplsPacket();
+
 public slots:
-    void saveFile();
-    void loadFile();
     void addRouter();
 
 private:
-    Site site;
+    std::shared_ptr<Site> site;
+    bool eventFilter(QObject *, QEvent *);
     QGraphicsItem *itemAt(const QPointF&);
     MainWindow *view;
     QGraphicsScene *scene;
     ConnectionView *conn;
+    std::stack<std::tuple<std::vector<Label>, PortId, PortId> > lastMplsPackets;
+    PortId nextHopPort;
 
 private slots:
-  //void contextMenuRequested(const QPoint &pos);
- // {
-
-     // QMenu contextMenu(tr("Context menu"), this);
-     // std::cout<<"bbb"<<std::endl;
-     // QAction action1("Remove Data Point", this);
-     // connect(&action1, SIGNAL(triggered()), this, SLOT(quit()));
-    //  m_pContextMenu->addAction(&action1);
-    //  m_pContextMenu->popup(mapToGlobal(point));
-
-  //}
-    void cout1()
-    {
-        std::cout<<1<<std::endl;
-    }
-    void cout2()
-    {
-        std::cout<<2<<std::endl;
-    }
-    void cout3()
-    {
-        std::cout<<3<<std::endl;
-    }
-    void cout4()
-    {
-        std::cout<<4<<std::endl;
-    }
 void deleteItem(QWidget *item);
-
-
-    // QNEBlock *selBlock;
 };
 

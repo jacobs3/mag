@@ -23,10 +23,16 @@ SOURCES +=\
     PortView.cpp \
     Port.cpp \
     Connection.cpp \
-    RouterManagementDialog.cpp
+    RouterManagementDialog.cpp \
+    IObservable.cpp \
+    TableDialog.cpp \
+    SimulateTrafficDialog.cpp \
+    MplsPacketView.cpp \
+    NextHopCalculator.cpp
 
 
 HEADERS  += \
+    IController.hpp \
     Editor.hpp \
     UiMainWindow.hpp \
     MainWindow.hpp \
@@ -39,7 +45,18 @@ HEADERS  += \
     Connection.hpp \
     PortView.hpp \
     Port.hpp \
-    RouterManagementDialog.hpp
+    RouterManagementDialog.hpp \
+    IObserver.hpp \
+    IObservable.hpp \
+    MplsIlmTable.hpp \
+    MplsFtnTable.hpp \
+    MplsNhlfeTable.hpp \
+    TableDialog.hpp \
+    SimulateTrafficDialog.hpp \
+    MplsPacketView.hpp \
+    NextHopCalculator.hpp
+
+    
 
 DISTFILES +=
 

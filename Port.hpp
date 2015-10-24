@@ -1,12 +1,10 @@
-
-
-
 #pragma once
 
 #include <string>
 #include "Typedefs.hpp"
+#include "IObservable.hpp"
 
-class Port
+class Port : public IObservable
 {
 public:
     Port(PortId, std::string, bool);

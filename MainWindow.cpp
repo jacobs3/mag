@@ -26,25 +26,29 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 #include "MainWindow.hpp"
 #include "PortView.hpp"
-
-#include "Editor.hpp"
+#include "TableDialog.hpp"
+#include "RouterManagementDialog.hpp"
+#include "SimulateTrafficDialog.hpp"
 
 #include <QGraphicsScene>
 #include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent)
+    QMainWindow(parent),
+    mplsPacketItem(nullptr)
 {
-
-
     scene = new QGraphicsScene();
-
-
-
-
     setWindowTitle(tr("MPLS manager"));
+    this->setAttribute(Qt::WA_AlwaysShowToolTips);
+}
 
+void MainWindow::setController(std::shared_ptr<IController> c)
+{
+    nodesEditor = c;
+}
 
+void MainWindow::start()
+{
 
     dock = new QDockWidget(tr("View"), this);
     dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
@@ -57,111 +61,24 @@ MainWindow::MainWindow(QWidget *parent) :
     addDockWidget(Qt::LeftDockWidgetArea, dock);
 
 
-
-
-
-
-
-    nodesEditor = new Editor(this);
     nodesEditor->install(scene);
 
 
-    QAction *quitAct = new QAction(tr("&Quit"), this);
-    quitAct->setShortcuts(QKeySequence::Quit);
-    quitAct->setStatusTip(tr("Quit the application"));
-    connect(quitAct, SIGNAL(triggered()), qApp, SLOT(quit()));
-
-    QAction *loadAct = new QAction(tr("&Load"), this);
-    loadAct->setShortcuts(QKeySequence::Open);
-    loadAct->setStatusTip(tr("Open a file"));
-    connect(loadAct, SIGNAL(triggered()), nodesEditor, SLOT(loadFile()));
-
-    QAction *saveAct = new QAction(tr("&Save"), this);
-    saveAct->setShortcuts(QKeySequence::Save);
-    saveAct->setStatusTip(tr("Save a file"));
-    connect(saveAct, SIGNAL(triggered()), nodesEditor, SLOT(saveFile()));
-
     QAction *addAct = new QAction(tr("&Add"), this);
-    addAct->setStatusTip(tr("Add a block"));
-    connect(addAct, SIGNAL(triggered()), nodesEditor, SLOT(addRouter()));
+    addAct->setStatusTip(tr("Add a router"));
+    IController* tmp = nodesEditor.get();
+
+    connect(addAct, SIGNAL(triggered()), tmp, SLOT(addRouter()));
+
+    QAction *quitAct = new QAction(tr("&Exit"), this);
+    quitAct->setStatusTip(tr("Quit application"));
+    connect(quitAct, SIGNAL(triggered()), QApplication::instance(), SLOT(quit()));
 
     fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->addAction(addAct);
-    fileMenu->addAction(loadAct);
-    fileMenu->addAction(saveAct);
     fileMenu->addSeparator();
     fileMenu->addAction(quitAct);
 
-
-
-  /*  RouterView *b = new RouterView(0);
-    scene->addItem(b);
-    b->addPort("R1", 0, PortView::NamePort);
-  //  b->addPort("test", 0, QNEPort::TypePort);
-    b->addInputPort("in");
-   // b->addInputPort("in2");
-   // b->addInputPort("in3");
-    b->addOutputPort("out");
-        b->addOutputPort("out2");
-   // b->addOutputPort("out2");
-    //b->addOutputPort("out3");
-
-    b->setPos(0,0);
-    b->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(b, SIGNAL(customContextMenuRequested(const QPoint&)),
-        this, SLOT(showContextMenu(const QPoint&)));
-    //b = b->clone();
-   // b->addPort("R2", 0, QNEPort::NamePort);
-    RouterView *b2 = new RouterView(0);
-    scene->addItem(b2);
-    b2->addPort("R2", 0, PortView::NamePort);
-
-    b2->addInputPort("in");
-    b2->addOutputPort("out");
-    b2->setPos(150, 0);
-
-    RouterView *b3 = new RouterView(0);
-        scene->addItem(b3);
-    b3->addPort("R3", 0, PortView::NamePort);
-    b3->addInputPort("in");
-        b3->addInputPort("in2");
-    b3->addOutputPort("out");
-    b3->setPos(150, 150);
-
-
-    RouterView *b4 = new RouterView(0);
-        scene->addItem(b4);
-    b4->addPort("R4", 0, PortView::NamePort);
-    b4->addInputPort("in");
-    b4->addOutputPort("out");
-    b4->setPos(-150, -150);
-
-    RouterView *b5 = new RouterView(0);
-        scene->addItem(b5);
-    b5->addPort("R5", 0, PortView::NamePort);
-    b5->addInputPort("in");
-    b5->addOutputPort("out");
-    b5->setPos(-150, 150);
-
-    RouterView *b6 = new RouterView(0);
-        scene->addItem(b6);
-    b6->addPort("R6", 0, PortView::NamePort);
-    b6->addInputPort("in");
-    b6->addOutputPort("out");
-    b6->setPos(150, -150);
-
-    RouterView *b7 = new RouterView(0);
-        scene->addItem(b7);
-    b7->addPort("R7", 0, PortView::NamePort);
-    b7->addInputPort("in");
-    b7->addOutputPort("out");
-    b7->setPos(-150, 0);
-
-
-   // b = b->clone();
-   // b->addPort("R3", 0, QNEPort::NamePort);
-  //  b->
-   // b->setPos(150, 150);*/
     resize(QDesktopWidget().availableGeometry(this).size() * 0.7);
 }
 
@@ -172,54 +89,35 @@ MainWindow::~MainWindow()
 
 
 
-void MainWindow::addRouter(RouterId id)
+void MainWindow::addRouter(RouterId routerId)
 {
-    RouterView *v = new RouterView(id);
-
+    RouterView *v = new RouterView(routerId);
     scene->addItem(v);
-    /*for (int i = 0; i < 4 + rand() % 3; i++)
-	{
-        v->addPort("RX", rand() % 2, 0, 0);
-        v->setPos(view->sceneRect().center().toPoint());
-    }*/
-    routers[id]=v;
+    routerViews[routerId]=v;
+    site->getRouter(routerId)->attach(this);
 }
 
 void MainWindow::addPort(RouterId routerId, PortId portId, std::string name, bool isInput)
 {
-    PortView* port = routers[routerId]->addPort(QString::fromUtf8(name.c_str()), isInput);
-    port->setId(portId);
-    routers[routerId]->setPos(view->sceneRect().center().toPoint());
-    ports[portId] = port;
-    scene->addItem(port);
+    std::cout<<"addport"<<std::endl;
+    PortView* portView = routerViews[routerId]->addPort(QString::fromUtf8(name.c_str()), isInput);
+    portView->setId(portId);
+    portViews[portId] = portView;
+    scene->addItem(portView);
+    site->getPort(portId)->attach(this);
 }
 
 void MainWindow::deletePort(PortId portId)
 {
-    delete ports[portId];
-
+    delete portViews[portId];
+    portViews.erase(portId);
 }
-/*void MainWindow::showContextMenu(const QPoint& pos) // this is a slot
+
+void MainWindow::refreshPortName(PortId portId, std::string name)
 {
-    // for most widgets
-    QPoint globalPos = b->mapToGlobal(pos);
-    // for QAbstractScrollArea and derived classes you would use:
-    // QPoint globalPos = myWidget->viewport()->mapToGlobal(pos);
+    portViews[portId]->setName(QString::fromUtf8(name.c_str()));
+}
 
-    QMenu myMenu;
-    myMenu.addAction("Menu Item 1");
-    // ...
-
-    QAction* selectedItem = myMenu.exec(globalPos);
-    if (selectedItem)
-    {
-        // something was chosen, do stuff
-    }
-    else
-    {
-        // nothing was chosen
-    }
-}*/
 void MainWindow::showContextMenu(const QPoint &pos)
 {
    QMenu contextMenu(tr("Context menu"), this);
@@ -231,38 +129,55 @@ void MainWindow::showContextMenu(const QPoint &pos)
    contextMenu.exec(mapToGlobal(pos));
 }
 
-void MainWindow::showRouterMenu(RouterId id)
+
+void MainWindow::showRouterDialog(std::shared_ptr<Router> router)
 {
-    RouterManagementDialog *window = new RouterManagementDialog(nodesEditor->getSite().getRouter(id),nodesEditor, this);
+    RouterManagementDialog *window = new RouterManagementDialog(router,nodesEditor, this);
     window->show();
+}
 
-   /* std::shared_ptr<Router> r= ;
-    std::cout<<"1";
-    QWidget *wdg = new QWidget;
-   // QHBoxLayout* layout = new QHBoxLayout;
-    QMainWindow *routerMenuWindow = new QMainWindow;
-    QHBoxLayout *layout = new QHBoxLayout( wdg );
-     std::cout<<"2";
-    QLabel * routerNameLabel = new QLabel(tr("router name"));
-   QLineEdit *lineEdit = new QLineEdit (tr(r->getName().c_str(), wdg ));
-   QPushButton *nameSubmitButton = new QPushButton(tr("Set name"),wdg);
-   layout->addWidget(routerNameLabel);
-   layout->addWidget(lineEdit);
-   layout->addWidget(nameSubmitButton);
+void MainWindow::showTableDialog(std::shared_ptr<Router> router)
+{
+    TableDialog *window = new TableDialog(router,nodesEditor, this);
+    window->show();
+}
 
-    routerMenuWindow->setCentralWidget(wdg);
-        routerMenuWindow->show();
-   // wdg->ad
-   // dock->setWidget(abc) ;
-    //layout->addWidget(wdg);
-   // wdg->show();
-  //  wdg->ad
-   // this->
-    QLineEdit *routerNameField = new QLineEdit("My first Text Edit box!");
-    QComboBox *comboBox = new QComboBox;
-        comboBox->addItem(tr("item 1"));
-        comboBox->addItem(tr("item 2"));
-        comboBox->addItem(tr("item 3"));*/
+void MainWindow::showSimulateTrafficDialog(std::shared_ptr<Router> router)
+{
+    SimulateTrafficDialog *window = new SimulateTrafficDialog(router,nodesEditor, this);
+    window->show();
+}
 
+void MainWindow::update()
+{
+    for(auto p : portViews)
+    {
+        refreshPortName(p.first,site->getPort(p.first)->getName());
+    };
+}
 
+void MainWindow::setModel(std::shared_ptr<Site> pSite)
+{
+    site = pSite;
+}
+
+void MainWindow::showMplsPacket(PortId startPortId, PortId endPortId, std::vector<Label> outLabels)
+{
+   if(mplsPacketItem)
+   {
+       delete mplsPacketItem;
+       mplsPacketItem = nullptr;
+   }
+
+   mplsPacketItem = new MplsPacketView(portViews[startPortId]->scenePos(), portViews[endPortId]->scenePos(), outLabels);
+   scene->addItem(mplsPacketItem);
+}
+
+void MainWindow::eraseMplsPacket()
+{
+    if(mplsPacketItem)
+    {
+        delete mplsPacketItem;
+        mplsPacketItem = nullptr;
+    }
 }

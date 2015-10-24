@@ -30,6 +30,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 #include <QPen>
 #include <QGraphicsScene>
 
+#include <iostream>
 ConnectionView::ConnectionView(ConnectionId connId, QGraphicsItem *parent) : QGraphicsPathItem(parent)
 {
     id = connId;
@@ -42,9 +43,9 @@ ConnectionView::ConnectionView(ConnectionId connId, QGraphicsItem *parent) : QGr
 ConnectionView::~ConnectionView()
 {
 	if (m_port1)
-		m_port1->connections().remove(m_port1->connections().indexOf(this));
+        m_port1->setConnected(false);
 	if (m_port2)
-		m_port2->connections().remove(m_port2->connections().indexOf(this));
+        m_port2->setConnected(false);
 }
 
 void ConnectionView::setPos1(const QPointF &p)
@@ -59,6 +60,7 @@ void ConnectionView::setPos2(const QPointF &p)
 
 void ConnectionView::setPort1(PortView *p)
 {
+    std::cout<<"set port 1"<<p<<std::endl;
 	m_port1 = p;
 
 	m_port1->connections().append(this);
@@ -66,6 +68,7 @@ void ConnectionView::setPort1(PortView *p)
 
 void ConnectionView::setPort2(PortView *p)
 {
+    std::cout<<"set port 2"<<std::endl;
 	m_port2 = p;
 
 	m_port2->connections().append(this);
@@ -73,8 +76,15 @@ void ConnectionView::setPort2(PortView *p)
 
 void ConnectionView::updatePosFromPorts()
 {
-    pos1 = m_port1->scenePos();
-    pos2 = m_port2->scenePos();
+    if(m_port1)
+    {
+        pos1 = m_port1->scenePos();
+    }
+
+    if(m_port2)
+    {
+        pos2 = m_port2->scenePos();
+    }
 }
 
 void ConnectionView::updatePath()

@@ -31,37 +31,49 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 #include <QMainWindow>
 #include <QtWidgets>
 #include <list>
+#include <vector>
+#include <memory>
 #include "Typedefs.hpp"
-#include "RouterManagementDialog.hpp"
+#include "IController.hpp"
+#include "Router.hpp"
+#include "Port.hpp"
+#include "IObserver.hpp"
+#include "Site.hpp"
+#include "MplsPacketView.hpp"
 
-
-class Editor;
-
-class MainWindow : public QMainWindow
+class MainWindow : public QMainWindow, IObserver
 {
     Q_OBJECT
 
 public:
     explicit MainWindow(QWidget *parent = 0);
-    void showRouterMenu(RouterId id);
-    void addRouter(RouterId id);
+    void showRouterDialog(std::shared_ptr<Router> router);
+    void showTableDialog(std::shared_ptr<Router> router);
+    void showSimulateTrafficDialog(std::shared_ptr<Router> router);
+    void addRouter(RouterId routerId);
     void addPort(RouterId routerId, PortId portId, std::string name, bool isInput);
     void deletePort(PortId portId);
+    void setController(std::shared_ptr<IController> c);
+    void start();
+    void setModel(std::shared_ptr<Site> site);
+    void update();
+    void showMplsPacket(PortId startPortId, PortId endPortId, std::vector<Label> outLabels);
+    void eraseMplsPacket();
     ~MainWindow();
 
 private slots:
-
-
     void showContextMenu(const QPoint& pos);
 
 private:
-
-    Editor *nodesEditor;
+    void refreshPortName(PortId portId, std::string name);
+    std::shared_ptr<IController> nodesEditor;
+    std::shared_ptr<Site> site;
     QMenu *fileMenu;
     QGraphicsView *view;
     QGraphicsScene *scene;
-    std::map<RouterId, RouterView*> routers;
-    std::map<PortId, PortView*> ports;
+    std::map<RouterId, RouterView*> routerViews;
+    std::map<PortId, PortView*> portViews;
     QDockWidget *dock;
+    MplsPacketView* mplsPacketItem;
 
 };

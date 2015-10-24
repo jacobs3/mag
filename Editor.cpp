@@ -27,15 +27,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 #include "PortView.hpp"
 #include "ConnectionView.hpp"
 #include "Router.hpp"
-
-#include <QGraphicsScene>
+#include "MainWindow.hpp"
 #include <QEvent>
 
-//#include <qsignalmapper.h>
-//#include <functional>
 
 Editor::Editor(MainWindow *mainWindow, QMainWindow *parent)
-   : QMainWindow(parent), view(mainWindow)
+   : IController(parent), view(mainWindow)
 {
     this->setContextMenuPolicy(Qt::CustomContextMenu);
     conn = 0;
@@ -50,7 +47,7 @@ void Editor::install(QGraphicsScene *s)
 
 QGraphicsItem* Editor::itemAt(const QPointF &pos)
 {
-	QList<QGraphicsItem*> items = scene->items(QRectF(pos - QPointF(1,1), QSize(3,3)));
+    QList<QGraphicsItem*> items = scene->items(QRectF(pos - QPointF(1,1), QSize(3,3)));
 
 	foreach(QGraphicsItem *item, items)
 		if (item->type() > QGraphicsItem::UserType)
@@ -70,31 +67,29 @@ void Editor::handleRouterMenu(QGraphicsSceneMouseEvent *me)
     QAction *action2=new QAction("Label management", this);
     contextMenu.addAction(action2);
     QAction *action3=new QAction("Remove router", this);
-   contextMenu.addAction(action3);
+    contextMenu.addAction(action3);
     QAction* action4=new QAction("Simulate traffic", this);
     contextMenu.addAction(action4);
 
-   QAction* calledItem=  contextMenu.exec(mapToGlobal(me->scenePos().toPoint()));
-item->getId();
-   if(calledItem == action1)
-   {
-       view->showRouterMenu(item->getId());
-       cout1();
+    QAction* calledItem=  contextMenu.exec(me->screenPos());
+    item->getId();
+    if(calledItem == action1)
+    {
+        view->showRouterDialog(site->getRouter(item->getId()));
+    }
+    else if(calledItem == action2)
+    {
+        view->showTableDialog(site->getRouter(item->getId()));
+    }
+    else if(calledItem == action3)
+    {
+        site->deleteRouter(item->getId());
+        delete item;
    }
-   else if(calledItem == action2)
-   {
-       cout2();
-   }
-   else if(calledItem == action3)
-   {
-       std::cout<<"delete";
-       site.deleteRouter(item->getId());
-       delete item;
-   }
-   else if(calledItem == action4)
-   {
-       cout4();
-   }
+     else if(calledItem == action4)
+    {
+        view->showSimulateTrafficDialog(site->getRouter(item->getId()));
+    }
 }
 
 void Editor::handleLinkMenu(QGraphicsSceneMouseEvent *me)
@@ -115,28 +110,26 @@ void Editor::handleLinkMenu(QGraphicsSceneMouseEvent *me)
     if(calledItem == action1)
     {
        // item->onDelete();
-         site.deleteConnection(item->getId());
+         site->deleteConnection(item->getId());
          delete item;
     }
     else if(calledItem == action2)
     {
-        cout2();
     }
     else if(calledItem == action3)
     {
-       cout3();
     }
 }
 
 bool Editor::eventFilter(QObject *o, QEvent *e)
 {
 	QGraphicsSceneMouseEvent *me = (QGraphicsSceneMouseEvent*) e;
-
+//std::cout<<"eventFilter";
 	switch ((int) e->type())
 	{
 	case QEvent::GraphicsSceneMousePress:
 	{
-
+std::cout<<"press";
 		switch ((int) me->button())
 		{
 		case Qt::LeftButton:
@@ -144,16 +137,21 @@ bool Editor::eventFilter(QObject *o, QEvent *e)
 			QGraphicsItem *item = itemAt(me->scenePos());
             if (item && item->type() == PortView::Type)
 			{
-                ;
-                conn = new ConnectionView(site.initializeConnection());
+
+                conn = new ConnectionView(site->initializeConnection());
                 scene->addItem(conn);
                 conn->setPort1((PortView*) item);
+                ((PortView*) item)->setConnected(true);
 				conn->setPos1(item->scenePos());
 				conn->setPos2(me->scenePos());
 				conn->updatePath();
 
 				return true;
             } else if (item && item->type() == RouterView::Type)
+            {
+                std::cout<<"7";
+                conn = nullptr;
+            }
 			{
                //  if (selBlock)
                  //   selBlock->setSelected();
@@ -169,11 +167,13 @@ bool Editor::eventFilter(QObject *o, QEvent *e)
             setContextMenuPolicy(Qt::CustomContextMenu);
             if (item && item->type() == ConnectionView::Type)
             {
+                std::cout<<"6";
                 handleLinkMenu(me);
 
             }
             else if(item && item->type() == RouterView::Type)
             {
+                std::cout<<"5";
                 handleRouterMenu(me);
             }
                 //delete item;
@@ -225,111 +225,56 @@ std::cout<<"gy "<<g.y()<<std::endl;*/
 	}
 	case QEvent::GraphicsSceneMouseMove:
 	{
-		if (conn)
+        std::cout<<"move1";
+        if (conn)
 		{
-			conn->setPos2(me->scenePos());
-			conn->updatePath();
+            std::cout<<"move2";
+            conn->setPos2(me->scenePos());
+            conn->updatePath();
 			return true;
-		}
+        }
 		break;
 	}
 	case QEvent::GraphicsSceneMouseRelease:
 	{
+        std::cout<<"3";
 		if (conn && me->button() == Qt::LeftButton)
 		{
+            std::cout<<"4";
 			QGraphicsItem *item = itemAt(me->scenePos());
+            PortView *port1 = conn->port1();
+            PortView *port2 = (PortView*) item;
             if (item && item->type() == PortView::Type)
 			{
-                PortView *port1 = conn->port1();
-                PortView *port2 = (PortView*) item;
 
-                if (port1->block() != port2->block() && port1->getIsInput() != port2->getIsInput() && !port1->isConnected(port2))
-				{
+
+                if (port1->block() != port2->block() && port1->getIsInput() != port2->getIsInput() && !port2->isConnected())
+                {
+                    port2->setConnected(true);
 					conn->setPos2(port2->scenePos());
 					conn->setPort2(port2);
 					conn->updatePath();
-                    site.addConnection(conn->getId(), port1->getId(),port2->getId());
-					conn = 0;
+                    site->addConnection(conn->getId(), port1->getId(),port2->getId());
+                    conn = nullptr;
 					return true;
-				}
-			}
+                }
 
-			delete conn;
-			conn = 0;
+			}
+            else
+            {
+                port1->connections().clear();
+            }
+            delete conn;
+            conn = nullptr;
 			return true;
 		}
 		break;
 	}
 	}
-	return QObject::eventFilter(o, e);
+    return QObject::eventFilter(o, e);
 }
 
 
-
-void Editor::saveFile()
-{
-    QString fname = QFileDialog::getSaveFileName();
-    if (fname.isEmpty())
-        return;
-
-    QFile f(fname);
-    f.open(QFile::WriteOnly);
-    QDataStream ds(&f);
-    save(ds);
-}
-
-void Editor::loadFile()
-{
-    QString fname = QFileDialog::getOpenFileName();
-    if (fname.isEmpty())
-        return;
-
-    QFile f(fname);
-    f.open(QFile::ReadOnly);
-    QDataStream ds(&f);
-    load(ds);
-}
-
-void Editor::save(QDataStream &ds)
-{
-	foreach(QGraphicsItem *item, scene->items())
-        if (item->type() == RouterView::Type)
-		{
-			ds << item->type();
-            ((RouterView*) item)->save(ds);
-		}
-
-	foreach(QGraphicsItem *item, scene->items())
-        if (item->type() == ConnectionView::Type)
-		{
-			ds << item->type();
-            ((ConnectionView*) item)->save(ds);
-		}
-}
-
-void Editor::load(QDataStream &ds)
-{
-	scene->clear();
-
-    QMap<quint64, PortView*> portMap;
-
-	while (!ds.atEnd())
-	{
-		int type;
-		ds >> type;
-        if (type == RouterView::Type)
-		{
-            RouterView *block = new RouterView(0);
-            scene->addItem(block);
-			block->load(ds, portMap);
-        } else if (type == ConnectionView::Type)
-		{
-            ConnectionView *conn = new ConnectionView(0);
-            scene->addItem(conn);
-			conn->load(ds, portMap);
-		}
-	}
-}
 /*
 void Editor::contextMenuRequested(const QPoint &pos)
 {
@@ -350,11 +295,11 @@ void Editor::contextMenuRequested(const QPoint &pos)
 
 void Editor::addRouter()
 {
-    RouterId id= site.addRouter();
-    PortId inputPortId = site.addPort(id, "in", true);
-    PortId outputPortId = site.addPort(id, "out", false);
-    site.getRouter(id)->addInputPort(inputPortId, site.getPort(inputPortId));
-    site.getRouter(id)->addOutputPort(outputPortId, site.getPort(outputPortId));
+    RouterId id= site->addRouter();
+    PortId inputPortId = site->addPort(id, "in", true);
+    PortId outputPortId = site->addPort(id, "out", false);
+    site->getRouter(id)->addInputPort(inputPortId, site->getPort(inputPortId));
+    site->getRouter(id)->addOutputPort(outputPortId, site->getPort(outputPortId));
     view->addRouter(id);
     view->addPort(id, inputPortId, "in", true);
     view->addPort(id, outputPortId, "out", false);
@@ -366,30 +311,117 @@ void Editor::deleteItem(QWidget *item)
     delete item;
 }
 
-Site& Editor::getSite()
-{
-    return site;
-}
 
 
-void Editor::setRouterName(RouterId id, std::string name)
+bool Editor::setRouterName(RouterId id, std::string name)
 {
-    site.getRouter(id)->setName(name);
+    return site->setRouterName(id, name);
 }
 
 void Editor::setPortName(PortId id, std::string name)
 {
-    site.getPort(id)->setName(name);
+    site->getPort(id)->setName(name);
 }
 
 void Editor::removePort(RouterId routerId, PortId portId)
 {
-    site.deletePort(routerId, portId);
     view->deletePort(portId);
+    site->deletePort(routerId, portId);
 }
 
 void Editor::addPort(RouterId routerId, std::string name, bool isInput)
 {
-    PortId portId = site.addPort(routerId, name, isInput);
+    PortId portId = site->addPort(routerId, name, isInput);
     view->addPort(routerId, portId, name, isInput);
+}
+
+void Editor::setModel(std::shared_ptr<Site> pSite)
+{
+    site = pSite;
+}
+
+std::string Editor::addNhlfeEntry(RouterId id, NhlfeEntry entry)
+{
+    return (site->getRouter(id))->addNhlfeEntry(entry);
+}
+
+void Editor::removeNhlfeEntry(RouterId id, NhlfeEntry entry)
+{
+    (site->getRouter(id))->removeNhlfeEntry(entry);
+}
+
+std::string Editor::addIlmEntry(RouterId id, IlmEntry entry)
+{
+    return (site->getRouter(id))->addIlmEntry(entry);
+}
+
+void Editor::removeIlmEntry(RouterId id, IlmEntry entry)
+{
+    (site->getRouter(id))->removeIlmEntry(entry);
+}
+
+std::string Editor::addFtnEntry(RouterId id, FtnEntry entry)
+{
+    return (site->getRouter(id))->addFtnEntry(entry);
+}
+
+void Editor::removeFtnEntry(RouterId id, FtnEntry entry)
+{
+    (site->getRouter(id))->removeFtnEntry(entry);
+}
+
+std::string Editor::displayNextMplsPacket()
+{
+    try
+    {
+        lastMplsPackets.push(site->calculateNextHop(nextHopPort));
+        nextHopPort = std::get<2>(lastMplsPackets.top());
+        view->showMplsPacket(std::get<1>(lastMplsPackets.top()), std::get<2>(lastMplsPackets.top()),
+                             std::get<0>(lastMplsPackets.top()));
+    }
+    catch(std::runtime_error e)
+    {
+        return std::string(e.what());
+    }
+    return "";
+}
+
+std::string Editor::displayNextMplsPacket(RouterId id, FEC fec)
+{
+    try
+    {
+        std::cout<<"displayNextMplsPacket 1"<<std::endl;
+        lastMplsPackets.push(site->calculateNextHop(id, fec));
+        std::cout<<"displayNextMplsPacket 2"<<std::endl;
+        nextHopPort = std::get<2>(lastMplsPackets.top());
+        view->showMplsPacket(std::get<1>(lastMplsPackets.top()), std::get<2>(lastMplsPackets.top()),
+                             std::get<0>(lastMplsPackets.top()));
+        std::cout<<"displayNextMplsPacket 3"<<std::endl;
+    }
+    catch(std::runtime_error e)
+    {
+        return std::string(e.what());
+    }
+    return "";
+}
+
+std::string Editor::displayPrevMplsPacket()
+{
+    if(lastMplsPackets.size() > 0 )
+    {
+        view->showMplsPacket(std::get<1>(lastMplsPackets.top()), std::get<2>(lastMplsPackets.top()),
+                             std::get<0>(lastMplsPackets.top()));
+        lastMplsPackets.pop();
+        nextHopPort = std::get<2>(lastMplsPackets.top());
+    }
+    else
+    {
+        return "No previous packets to display";
+    }
+    return "";
+}
+
+void Editor::eraseMplsPacket()
+{
+    view->eraseMplsPacket();
 }
